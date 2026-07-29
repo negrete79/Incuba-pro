@@ -1,4 +1,4 @@
-var CACHE = 'incubapro-v1';
+var CACHE = 'incubapro-v2';
 
 self.addEventListener("install", function(e) {
   e.waitUntil(
@@ -8,9 +8,7 @@ self.addEventListener("install", function(e) {
         './index.html',
         './style.css',
         './app.js',
-        './manifest.json',
-        './icon-192.png',
-        './icon-512.png'
+        './manifest.json'
       ]);
     })
   );
