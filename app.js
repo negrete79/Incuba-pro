@@ -230,23 +230,26 @@ function rHome() {
 }
 
 function openCreateLot() {
-  var h = '<div style="background:#111;border-radius:1.5rem 1.5rem 0 0;padding:1.5rem;border-top:1px solid rgba(255,255,255,0.1);display:flex;flex-direction:column;gap:1.25rem">';
+function openCreateLot() {
+  var h = '';
+  h += '<div style="background:#111;border-radius:1.5rem 1.5rem 0 0;padding:1.5rem;border-top:1px solid rgba(255,255,255,0.1);display:flex;flex-direction:column;gap:1.25rem">';
   h += '<div style="display:flex;justify-content:space-between;align-items:center"><h3 style="font-size:1rem;font-weight:700">Novo Lote</h3><button onclick="closeModal()" style="background:none;border:none;color:#737373;cursor:pointer;padding:4px"><iconify-icon icon="lucide:x" width="20"></iconify-icon></button></div>';
   h += '<div><label style="font-size:0.75rem;font-weight:600;color:#a3a3a3;display:block;margin-bottom:6px">Nome do Lote</label><input id="lotName" type="text" placeholder="Ex: Lote 01 - Galinha" style="width:100%;padding:0.75rem 1rem;border-radius:0.75rem;background:#050505;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;color:white;font-family:inherit"></div>';
   h += '<div><label style="font-size:0.75rem;font-weight:600;color:#a3a3a3;display:block;margin-bottom:6px">Espécie</label><select id="lotSpecies" onchange="toggleOutra()" style="width:100%;padding:0.75rem 1rem;border-radius:0.75rem;background:#050505;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;color:white;font-family:inherit;appearance:none">';
   for (var i=0; i<SPECIES.length; i++) {
     if (SPECIES[i].name === 'Outra') {
-      h += '<option value="__outra__">'+SPECIES[i].emoji+' '+SPECIES[i].name+'</option>';
+      h += '<option value="__outra__">' + SPECIES[i].emoji + ' ' + SPECIES[i].name + '</option>';
     } else {
-      h += '<option value="'+SPECIES[i].name+'">'+SPECIES[i].emoji+' '+SPECIES[i].name+' ('+SPECIES[i].days+' dias)</option>';
+      h += '<option value="' + SPECIES[i].name + '">' + SPECIES[i].emoji + ' ' + SPECIES[i].name + ' (' + SPECIES[i].days + ' dias)</option>';
     }
   }
   h += '</select></div>';
   h += '<div id="outraFields" style="display:none;flex-direction:column;gap:0.75rem">';
   h += '<div><label style="font-size:0.75rem;font-weight:600;color:#a3a3a3;display:block;margin-bottom:6px">Nome da Espécie</label><input id="outraNome" type="text" placeholder="Ex: Calopsita" style="width:100%;padding:0.75rem 1rem;border-radius:0.75rem;background:#050505;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;color:white;font-family:inherit"></div>';
-  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem"><div><label style="font-size:0.75rem;font-weight:600;color:#a3a3a3;display:block;margin-bottom:6px">Dias de Incubação</label><input id="outraDias" type="number" min="1" max="120" placeholder="21" style="width:100%;padding:0.75rem 1rem;border-radius:0.75rem;background:#050505;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;color:white;font-family:inherit"></div><div><label style="font-size:0.75rem;font-weight:600;color:#a3a3a3;display:block;margin-bottom:6px">Temperatura (°C)</label><input id="outraTemp" type="text" placeholder="37.5" style="width:100%;padding:0.75rem 1rem;border-radius:0.75rem;background:#050505;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;color:white;font-family:inherit"></div></div></div>';
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem"><div><label style="font-size:0.75rem;font-weight:600;color:#a3a3a3;display:block;margin-bottom:6px">Dias de Incubação</label><input id="outraDias" type="number" min="1" max="120" placeholder="21" style="width:100%;padding:0.75rem 1rem;border-radius:0.75rem;background:#050505;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;color:white;font-family:inherit"></div><div><label style="font-size:0.75rem;font-weight:600;color:#a3a3a3;display:block;margin-bottom:6px">Temperatura (°C)</label><input id="outraTemp" type="text" placeholder="37.5" style="width:100%;padding:0.75rem 1rem;border-radius:0.75rem;background:#050505;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;color:white;font-family:inherit"></div></div>';
+  h += '</div>';
   h += '<div><label style="font-size:0.75rem;font-weight:600;color:#a3a3a3;display:block;margin-bottom:6px">Quantidade de Ovos</label><input id="lotEggs" type="number" min="1" max="999" placeholder="Ex: 24" style="width:100%;padding:0.75rem 1rem;border-radius:0.75rem;background:#050505;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;color:white;font-family:inherit"></div>';
-  h += '<div><label style="font-size:0.75rem;font-weight:600;color:#a3a3a3;display:block;margin-bottom:6px">Data de Início</label><input id="lotDate" type="date" value="'+new Date().toISOString().split('T')[0]+'" style="width:100%;padding:0.75rem 1rem;border-radius:0.75rem;background:#050505;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;color:white;font-family:inherit;color-scheme:dark"></div>';
+  h += '<div><label style="font-size:0.75rem;font-weight:600;color:#a3a3a3;display:block;margin-bottom:6px">Data de Início</label><input id="lotDate" type="date" value="' + new Date().toISOString().split('T')[0] + '" style="width:100%;padding:0.75rem 1rem;border-radius:0.75rem;background:#050505;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;color:white;font-family:inherit;color-scheme:dark"></div>';
   h += '<label style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;border-radius:0.75rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);cursor:pointer"><input type="checkbox" id="lotAutoTurn" checked style="width:1rem;height:1rem;border-radius:4px;accent-color:#E6B800"><span style="font-size:0.75rem;color:#d4d4d4">Lembretes automáticos de viragem (3x/dia)</span></label>';
   h += '<button onclick="createLot()" style="width:100%;padding:0.875rem;border-radius:0.75rem;background:linear-gradient(135deg,#F2C94C,#E6B800);color:#050505;font-size:0.875rem;font-weight:700;border:none;cursor:pointer;font-family:inherit">Criar Lote</button>';
   h += '</div>';
