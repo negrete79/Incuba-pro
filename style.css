@@ -28,11 +28,6 @@ body {
   to { opacity: 1; }
 }
 
-@keyframes pulseRing {
-  0% { transform: scale(1); opacity: 0.4; }
-  100% { transform: scale(1.8); opacity: 0; }
-}
-
 @keyframes msgIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -101,7 +96,6 @@ select:focus {
   animation: floatY 3s ease-in-out infinite;
 }
 
-/* Modal overlay */
 #modalOverlay {
   position: fixed;
   inset: 0;
@@ -128,7 +122,6 @@ select:focus {
   animation: modalBox 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Confirm overlay */
 #confirmOverlay {
   position: fixed;
   inset: 0;
@@ -155,7 +148,6 @@ select:focus {
   animation: modalBox 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Notif panel */
 #notifPanel {
   position: fixed;
   inset: 0;
@@ -184,7 +176,6 @@ select:focus {
   overflow-y: auto;
 }
 
-/* Toast */
 .toast-msg {
   position: fixed;
   top: 4rem;
@@ -206,10 +197,9 @@ select:focus {
   animation: slideUp 0.3s ease, fadeOut 0.3s ease 2s forwards;
 }
 
-/* Tab bar */
 .tb.on {
   color: #E6B800;
 }
 .tb.on .dot {
   opacity: 1;
-  }
+}
