@@ -9,36 +9,15 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="IncubaPro">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%23050505'/><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23F2C94C'/><stop offset='1' stop-color='%23E6B800'/></linearGradient></defs><rect x='60' y='40' width='72' height='96' rx='36' fill='url(%23g)'/><rect x='76' y='72' width='40' height='48' rx='20' fill='%23050505' opacity='.3'/></svg>">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%23050505'/><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23F2C94C'/><stop offset='1' stop-color='%23E6B800'/></linearGradient></defs><ellipse cx='256' cy='240' rx='90' ry='130' fill='url(%23g)'/><ellipse cx='256' cy='260' rx='55' ry='75' fill='%23050505' opacity='.25'/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
     tailwind.config={theme:{extend:{fontFamily:{sans:['Manrope','sans-serif']},colors:{gold:{100:'#FDEEbb',300:'#F2C94C',400:'#FFD369',500:'#E6B800',600:'#B38F00'},charcoal:{800:'#1A1A1A',900:'#111111',950:'#050505'}},backgroundImage:{'gold-gradient':'linear-gradient(135deg, #F2C94C 0%, #E6B800 100%)'}}}}
     </script>
-    <style>
-        ::selection{background:rgba(242,201,76,.2);color:#FFD369}
-        *{-webkit-tap-highlight-color:transparent}
-        body{overscroll-behavior:none}
-        .scr{display:none}.scr.on{display:flex;flex-direction:column;animation:fi .25s ease}
-        @keyframes fi{from{opacity:0}to{opacity:1}}
-        @keyframes pr{0%{transform:scale(1);opacity:.4}100%{transform:scale(1.8);opacity:0}}
-        .pd{position:relative}.pd::before{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid #E6B800;animation:pr 2s ease-out infinite}
-        .tb.on{color:#E6B800}.tb.on .dot{opacity:1}
-        .msg{animation:mi .3s ease}@keyframes mi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-        .tp{animation:bl 1.4s infinite both}.tp:nth-child(2){animation-delay:.2s}.tp:nth-child(3){animation-delay:.4s}
-        @keyframes bl{0%,80%,100%{opacity:.2}40%{opacity:1}}
-        input:focus,textarea:focus,select:focus{outline:none}
-        ::-webkit-scrollbar{width:0;height:0}
-        .slu{animation:slu .35s cubic-bezier(.16,1,.3,1)}@keyframes slu{from{transform:translateY(100%)}to{transform:translateY(0)}}
-        @keyframes fo{to{opacity:0;transform:translateY(-10px)}}
-        .mbg{animation:mbg .2s ease}@keyframes mbg{from{opacity:0}to{opacity:1}}
-        .mbox{animation:mbox .3s cubic-bezier(.16,1,.3,1)}@keyframes mbox{from{opacity:0;transform:scale(.95) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
-        #chatContainer{scroll-behavior:smooth}
-        .lot-card{transition:all .2s ease}.lot-card:active{transform:scale(0.98)}
-        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-        .float-anim{animation:float 3s ease-in-out infinite}
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-charcoal-950 text-white font-sans antialiased">
 <div class="max-w-md mx-auto min-h-screen flex flex-col relative">
@@ -60,121 +39,33 @@
         <div id="page-table" class="scr px-5 pt-3 pb-6 space-y-4"></div>
         <div id="page-settings" class="scr px-5 pt-3 pb-6 space-y-5"></div>
     </main>
-    <div id="notifPanel" class="fixed inset-0 z-50 hidden" onclick="closeNotifPanel()">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-        <div class="absolute top-0 right-0 w-full max-w-sm h-full bg-charcoal-950 border-l border-white/10 slu overflow-y-auto" onclick="event.stopPropagation()">
-            <div class="flex items-center justify-between p-5 border-b border-white/5"><h3 class="text-sm font-bold">Notificações</h3><button onclick="closeNotifPanel()" class="text-neutral-500 hover:text-white"><iconify-icon icon="lucide:x" width="20"></iconify-icon></button></div>
-            <div class="p-4 space-y-2" id="notifList"></div>
+    <div id="notifPanel">
+        <div class="notif-bg" onclick="closeNotifPanel()"></div>
+        <div class="notif-drawer" onclick="event.stopPropagation()">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:1.25rem;border-bottom:1px solid rgba(255,255,255,0.05)"><h3 style="font-size:0.875rem;font-weight:700">Notificações</h3><button onclick="closeNotifPanel()" style="background:none;border:none;color:#737373;cursor:pointer"><iconify-icon icon="lucide:x" width="20"></iconify-icon></button></div>
+            <div style="padding:1rem;display:flex;flex-direction:column;gap:0.5rem" id="notifList"></div>
         </div>
     </div>
-    <div id="modalOverlay" class="fixed inset-0 z-50 hidden" onclick="closeModal()">
-        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm mbg"></div>
-        <div class="absolute bottom-0 left-0 right-0 max-w-md mx-auto mbox" id="modalContent" onclick="event.stopPropagation()"></div>
+    <div id="modalOverlay">
+        <div class="overlay-bg" onclick="closeModal()"></div>
+        <div class="overlay-content" id="modalContent" onclick="event.stopPropagation()"></div>
     </div>
-    <div id="confirmOverlay" class="fixed inset-0 z-[60] hidden">
-        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm mbg" onclick="closeConf()"></div>
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] max-w-sm mbox">
-            <div class="bg-charcoal-900 rounded-2xl p-6 border border-white/10 text-center" id="confirmContent"></div>
+    <div id="confirmOverlay">
+        <div class="overlay-bg" onclick="closeConf()"></div>
+        <div class="overlay-box">
+            <div style="background:#111;border-radius:1rem;padding:1.5rem;border:1px solid rgba(255,255,255,0.1);text-align:center" id="confirmContent"></div>
         </div>
     </div>
     <nav class="fixed bottom-0 left-0 right-0 z-40 bg-charcoal-950/95 backdrop-blur-md border-t border-white/5">
         <div class="max-w-md mx-auto flex items-center justify-around py-2 px-2">
             <button onclick="nav('home')" class="tb on flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors" data-t="home"><iconify-icon icon="lucide:home" width="20"></iconify-icon><span class="text-[10px] font-medium">Início</span><div class="dot w-1 h-1 rounded-full bg-gold-400 opacity-0 transition-opacity"></div></button>
-            <button onclick="nav('calendar')" class="tb flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-neutral-500 transition-colors" data-t="calendar"><iconify-icon icon="lucide:calendar" width="20"></iconify-icon><span class="text-[10px] font-medium">Calendário</span><div class="dot w-1 h-1 rounded-full bg-gold-400 opacity-0 transition-opacity"></div></button>
-            <button onclick="nav('ai')" class="tb flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-neutral-500 transition-colors relative" data-t="ai"><div class="w-10 h-10 -mt-5 rounded-full bg-gold-gradient flex items-center justify-center shadow-[0_0_20px_-3px_rgba(242,201,76,0.5)]"><iconify-icon icon="lucide:bot" width="20" class="text-charcoal-900"></iconify-icon></div><span class="text-[10px] font-medium -mt-0.5">IA</span><div class="dot w-1 h-1 rounded-full bg-gold-400 opacity-0 transition-opacity"></div></button>
-            <button onclick="nav('lots')" class="tb flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-neutral-500 transition-colors" data-t="lots"><iconify-icon icon="lucide:layers" width="20"></iconify-icon><span class="text-[10px] font-medium">Lotes</span><div class="dot w-1 h-1 rounded-full bg-gold-400 opacity-0 transition-opacity"></div></button>
-            <button onclick="nav('table')" class="tb flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-neutral-500 transition-colors" data-t="table"><iconify-icon icon="lucide:table-2" width="20"></iconify-icon><span class="text-[10px] font-medium">Tabela</span><div class="dot w-1 h-1 rounded-full bg-gold-400 opacity-0 transition-opacity"></div></button>
+            <button onclick="nav('calendar')" class="tb flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors" data-t="calendar"><iconify-icon icon="lucide:calendar" width="20"></iconify-icon><span class="text-[10px] font-medium">Calendário</span><div class="dot w-1 h-1 rounded-full bg-gold-400 opacity-0 transition-opacity"></div></button>
+            <button onclick="nav('ai')" class="tb flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors relative" data-t="ai"><div class="w-10 h-10 -mt-5 rounded-full bg-gold-gradient flex items-center justify-center shadow-[0_0_20px_-3px_rgba(242,201,76,0.5)]"><iconify-icon icon="lucide:bot" width="20" class="text-charcoal-900"></iconify-icon></div><span class="text-[10px] font-medium -mt-0.5">IA</span><div class="dot w-1 h-1 rounded-full bg-gold-400 opacity-0 transition-opacity"></div></button>
+            <button onclick="nav('lots')" class="tb flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors" data-t="lots"><iconify-icon icon="lucide:layers" width="20"></iconify-icon><span class="text-[10px] font-medium">Lotes</span><div class="dot w-1 h-1 rounded-full bg-gold-400 opacity-0 transition-opacity"></div></button>
+            <button onclick="nav('table')" class="tb flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors" data-t="table"><iconify-icon icon="lucide:table-2" width="20"></iconify-icon><span class="text-[10px] font-medium">Tabela</span><div class="dot w-1 h-1 rounded-full bg-gold-400 opacity-0 transition-opacity"></div></button>
         </div>
     </nav>
 </div>
-
-<script>
-/* ===== PWA: Manifest via Blob + Service Worker via arquivo ===== */
-var manifest={name:"IncubaPro",short_name:"IncubaPro",description:"Assistente completo para incubação de ovos",start_url:location.href,display:"standalone",background_color:"#050505",theme_color:"#050505",orientation:"portrait",icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%23050505'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23F2C94C'/%3E%3Cstop offset='1' stop-color='%23E6B800'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='60' y='40' width='72' height='96' rx='36' fill='url(%23g)'/%3E%3Crect x='76' y='72' width='40' height='48' rx='20' fill='%23050505' opacity='.3'/%3E%3C/svg%3E",sizes:"192x192",type:"image/svg+xml",purpose:"any maskable"}]};
-var mBlob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
-var mURL=URL.createObjectURL(mBlob);
-var mLink=document.createElement('link');mLink.rel='manifest';mLink.href=mURL;document.head.appendChild(mLink);
-
-if('serviceWorker'in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}
-
-/* ===== DADOS ===== */
-var SPECIES=[
-    {name:'Galinha',days:21,temp:'37.5-37.8',humid:'55-60',humidLock:'65-70',turns:'3x/dia',emoji:'🐔'},
-    {name:'Codorna',days:17,temp:'37.5-37.8',humid:'50-55',humidLock:'60-65',turns:'3x/dia',emoji:'🐣'},
-    {name:'Pato',days:28,temp:'37.2-37.5',humid:'55-60',humidLock:'70-75',turns:'3-4x/dia',emoji:'🦆'},
-    {name:'Peru',days:28,temp:'37.2-37.5',humid:'55-60',humidLock:'65-70',turns:'3x/dia',emoji:'🦃'},
-    {name:'Marreco',days:28,temp:'37.2-37.5',humid:'55-60',humidLock:'70-75',turns:'3-4x/dia',emoji:'🦆'},
-    {name:'Faisão',days:24,temp:'37.5-37.8',humid:'55-60',humidLock:'65-70',turns:'3x/dia',emoji:'🦅'},
-    {name:'Pavão',days:28,temp:'37.2-37.5',humid:'55-60',humidLock:'65-70',turns:'3x/dia',emoji:'🦚'},
-    {name:'Ganso',days:31,temp:'37.2-37.5',humid:'55-60',humidLock:'70-75',turns:'3-4x/dia',emoji:'🪿'}
-];
-var TIPS=[
-    'No dia 12, evite abrir a incubadora por mais de 30 segundos.',
-    'Virar ovos 3x ao dia em horários regulares melhora a taxa de eclosão.',
-    'Umidade abaixo de 50% causa desidratação dos embriões.',
-    'Na ovoscopia, ovo claro sem veias é infértil — remova-o.',
-    'No lockdown, NÃO vire mais os ovos!',
-    'Meça a temperatura na altura dos ovos, não no topo.',
-    'Deixe o pintinho secar 12-24h antes de transferir para o criatório.',
-    'Lave as mãos antes de manusear os ovos.',
-    'Temperatura acima de 39°C por horas pode matar o embrião.',
-    'Ovos muito grandes ou muito pequenos têm menor taxa de eclosão.'
-];
-
-/* ===== ESTADO ===== */
-var S;
-try{S=JSON.parse(localStorage.getItem('incubapro_v10'));}catch(e){}
-if(!S||!S.lots){S={lots:[],activeLotId:null,readings:[],notifications:[],calMonth:new Date().getMonth(),calYear:new Date().getFullYear(),chatHistory:[],alarms:[],checkedDays:{},apiKey:''};}
-if(!S.alarms)S.alarms=[];
-if(!S.checkedDays)S.checkedDays={};
-if(!S.apiKey)S.apiKey='';
-function save(){localStorage.setItem('incubapro_v10',JSON.stringify(S));}
-
-/* ===== UTILS ===== */
-function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function sp(n){for(var i=0;i<SPECIES.length;i++)if(SPECIES[i].name===n)return SPECIES[i];return SPECIES[0];}
-function active(){for(var i=0;i<S.lots.length;i++)if(S.lots[i].id===S.activeLotId)return S.lots[i];return null;}
-function ds(d){var s=new Date(d),n=new Date();s.setHours(0,0,0,0);n.setHours(0,0,0,0);return Math.floor((n-s)/86400000);}
-function gid(){return Date.now().toString(36)+Math.random().toString(36).substr(2,6);}
-function fmtDate(d){var dt=new Date(d);return dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});}
-function toast(m){var d=document.createElement('div');d.className='fixed top-16 left-1/2 -translate-x-1/2 z-[70] flex items-center gap-2 px-5 py-3 rounded-xl bg-charcoal-900 border border-white/10 backdrop-blur-xl shadow-xl text-sm text-neutral-200 whitespace-nowrap';d.style.animation='slu 0.3s ease, fo 0.3s ease 2s forwards';d.innerHTML='<iconify-icon icon="lucide:check-circle" width="16" class="text-gold-400 shrink-0"></iconify-icon>'+esc(m);document.body.appendChild(d);setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d);},2600);}
-
-/* ===== NOTIFICAÇÕES ===== */
-function addN(t,tp){S.notifications.unshift({text:t,type:tp||'info',time:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),read:false});if(S.notifications.length>30)S.notifications.pop();save();updB();}
-function updB(){var c=0;for(var i=0;i<S.notifications.length;i++)if(!S.notifications[i].read)c++;var el=document.getElementById('badge');if(c>0){el.textContent=c>9?'9+':c;el.classList.remove('hidden');}else{el.classList.add('hidden');}}
-function openNotifPanel(){document.getElementById('notifPanel').classList.remove('hidden');var l=document.getElementById('notifList'),h='';if(!S.notifications.length){h='<div class="text-center py-12"><iconify-icon icon="lucide:bell-off" width="36" class="text-neutral-800 mb-3 block"></iconify-icon><p class="text-xs text-neutral-600">Sem notificações</p></div>';}else{for(var i=0;i<S.notifications.length;i++){var n=S.notifications[i],ic=n.type==='warn'?'lucide:alert-triangle':n.type==='success'?'lucide:check-circle':'lucide:info',cl=n.type==='warn'?'text-amber-400':n.type==='success'?'text-emerald-400':'text-gold-400';h+='<div class="flex gap-3 p-3 rounded-xl '+(n.read?'bg-white/[0.02]':'bg-white/[0.05]')+' border border-white/5 cursor-pointer" onclick="markR('+i+')"><iconify-icon icon="'+ic+'" width="18" class="'+cl+' shrink-0 mt-0.5"></iconify-icon><div class="flex-1 min-w-0"><p class="text-xs leading-relaxed '+(n.read?'text-neutral-600':'text-neutral-300')+'">'+esc(n.text)+'</p><p class="text-[10px] text-neutral-700 mt-1">'+n.time+'</p></div>'+(n.read?'':'<div class="w-2 h-2 rounded-full bg-gold-400 shrink-0 mt-2"></div>')+'</div>';}}l.innerHTML=h;}
-function markR(i){S.notifications[i].read=true;save();updB();openNotifPanel();}
-function closeNotifPanel(){document.getElementById('notifPanel').classList.add('hidden');}
-
-/* ===== ALARMES ===== */
-function schedAlarms(lot){var s=sp(lot.species),td=parseInt(s.days),st=new Date(lot.startDate),now=new Date(),na=[];
-if(lot.autoTurn!==false){for(var d=0;d<td-3;d++){var ed=new Date(st);ed.setDate(ed.getDate()+d);if(ed>=now){[8,13,18].forEach(function(hr){var t=new Date(ed);t.setHours(hr,0,0,0);if(t>now)na.push({id:lot.id+'_t'+d+'_'+hr,lotId:lot.id,type:'turn',title:'Virar Ovos',body:lot.name+' — '+(d+1)+'° dia',time:t.toISOString(),fired:false});});}}}
-var o1=new Date(st);o1.setDate(o1.getDate()+7);o1.setHours(9,0,0,0);if(o1>now)na.push({id:lot.id+'_o1',lotId:lot.id,type:'ovoscopia',title:'1ª Ovoscopia',body:lot.name+' — Dia 7. Verifique os embriões!',time:o1.toISOString(),fired:false});
-var o2=new Date(st);o2.setDate(o2.getDate()+14);o2.setHours(9,0,0,0);if(o2>now)na.push({id:lot.id+'_o2',lotId:lot.id,type:'ovoscopia',title:'2ª Ovoscopia',body:lot.name+' — Dia 14. Verifique desenvolvimento!',time:o2.toISOString(),fired:false});
-var ld=new Date(st);ld.setDate(ld.getDate()+td-3);ld.setHours(7,0,0,0);if(ld>now)na.push({id:lot.id+'_ld',lotId:lot.id,type:'lockdown',title:'LOCKDOWN',body:lot.name+' — PARE de virar! Umidade '+s.humidLock+'%',time:ld.toISOString(),fired:false});
-var ec=new Date(st);ec.setDate(ec.getDate()+td);ec.setHours(6,0,0,0);if(ec>now)na.push({id:lot.id+'_ec',lotId:lot.id,type:'eclosao',title:'Dia da Eclosão!',body:lot.name+' — Hoje é o grande dia!',time:ec.toISOString(),fired:false});
-var rt=new Date(st);rt.setDate(rt.getDate()+td+1);rt.setHours(8,0,0,0);if(rt>now)na.push({id:lot.id+'_rt',lotId:lot.id,type:'retirada',title:'Retirar Pintinhos',body:lot.name+' — Transfira para o criatório.',time:rt.toISOString(),fired:false});
-S.alarms=S.alarms.filter(function(a){return a.lotId!==lot.id;}).concat(na);save();}
-function checkAlarms(){var now=new Date();for(var i=0;i<S.alarms.length;i++){var a=S.alarms[i];if(!a.fired&&new Date(a.time)<=now){a.fired=true;addN(a.title+': '+a.body,a.type==='lockdown'?'warn':'info');if('Notification'in window&&Notification.permission==='granted')new Notification(a.title,{body:a.body});}}save();}
-if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();
-setInterval(checkAlarms,30000);checkAlarms();
-function nextAlarm(lid){var now=new Date(),nx=null;for(var i=0;i<S.alarms.length;i++){var a=S.alarms[i];if(a.lotId===lid&&!a.fired&&new Date(a.time)>now){if(!nx||new Date(a.time)<new Date(nx.time))nx=a;}}return nx;}
-
-/* ===== MODAIS ===== */
-function openModal(h){document.getElementById('modalContent').innerHTML=h;document.getElementById('modalOverlay').classList.remove('hidden');}
-function closeModal(){document.getElementById('modalOverlay').classList.add('hidden');}
-function showConf(ti,ms,ok,lb){document.getElementById('confirmContent').innerHTML='<div class="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4"><iconify-icon icon="lucide:alert-triangle" width="28" class="text-red-400"></iconify-icon></div><h3 class="text-base font-bold mb-2">'+esc(ti)+'</h3><p class="text-sm text-neutral-400 mb-6 leading-relaxed">'+esc(ms)+'</p><div class="flex gap-3"><button onclick="closeConf()" class="flex-1 py-3 rounded-xl border border-white/10 text-sm font-medium text-neutral-400 hover:text-white transition-all">Cancelar</button><button id="cfmBtn" class="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-sm font-bold transition-all">'+esc(lb||'Excluir')+'</button></div>';closeModal();document.getElementById('confirmOverlay').classList.remove('hidden');document.getElementById('cfmBtn').onclick=function(){closeConf();ok();};}
-function closeConf(){document.getElementById('confirmOverlay').classList.add('hidden');}
-
-/* ===== NAVEGAÇÃO ===== */
-function nav(p){var all=document.querySelectorAll('.scr');for(var i=0;i<all.length;i++)all[i].classList.remove('on');var t=document.getElementById('page-'+p);if(t)t.classList.add('on');var tabs=document.querySelectorAll('.tb');for(var i=0;i<tabs.length;i++){tabs[i].classList.remove('on');tabs[i].classList.add('text-neutral-500');}var at=document.querySelector('.tb[data-t="'+p+'"]');if(at){at.classList.add('on');at.classList.remove('text-neutral-500');}
-var ti={home:'IncubaPro',calendar:'Calendário',ai:'Assistente IA',table:'Tabela Referência',lots:'Meus Lotes',settings:'Configurações'};
-document.getElementById('hTitle').textContent=ti[p]||'IncubaPro';
-var fn={home:rHome,lots:rLots,calendar:rCal,ai:rAI,table:rTable,settings:rSettings};
-if(fn[p])fn[p]();
-document.getElementById('mainArea').scrollTop=0;}
-
-/* ===== HOME ===== */
-function rHome(){var pg=document.getElementById('page-home'),act=active(),h='';
-if(!act){
-    h+='<div class="text-center pt-8 pb-6"><div class="w-20 h-20 rounded-full bg-charcoal-900 border border-white/10 flex items-center justify-center mx-auto mb-5"><iconify-icon icon="lucide:egg" width="32"
+<script src="app.js"></script>
+</body>
+</html>
