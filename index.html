@@ -9,9 +9,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="IncubaPro">
+<link rel="manifest" href="manifest.json">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 <script>
 tailwind.config={theme:{extend:{fontFamily:{sans:['Manrope','sans-serif']},colors:{gold:{100:'#FDEEbb',300:'#F2C94C',400:'#FFD369',500:'#E6B800',600:'#B38F00'},charcoal:{800:'#1A1A1A',900:'#111111',950:'#050505'}},backgroundImage:{'gold-gradient':'linear-gradient(135deg,#F2C94C 0%,#E6B800 100%)'}}}}
 </script>
@@ -59,6 +61,7 @@ input:focus,textarea:focus,select:focus{outline:none}
 <div id="page-settings" class="scr px-5 pt-3 pb-6 space-y-5"></div>
 </main>
 
+<!-- Painel de Notificações -->
 <div id="notifPanel" class="fixed inset-0 z-50 hidden" onclick="closeNotif()">
 <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
 <div class="absolute top-0 right-0 w-full max-w-sm h-full bg-charcoal-950 border-l border-white/10 slu overflow-y-auto" onclick="event.stopPropagation()">
@@ -67,11 +70,13 @@ input:focus,textarea:focus,select:focus{outline:none}
 </div>
 </div>
 
+<!-- Modal de Criação de Lote -->
 <div id="modalOverlay" class="fixed inset-0 z-50 hidden" onclick="closeModal()">
 <div class="absolute inset-0 bg-black/70 backdrop-blur-sm mbg"></div>
 <div class="absolute bottom-0 left-0 right-0 max-w-md mx-auto mbox" id="modalContent" onclick="event.stopPropagation()"></div>
 </div>
 
+<!-- Modal de Confirmação -->
 <div id="confirmOverlay" class="fixed inset-0 z-[60] hidden">
 <div class="absolute inset-0 bg-black/70 backdrop-blur-sm mbg" onclick="closeConf()"></div>
 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] max-w-sm mbox">
@@ -79,6 +84,7 @@ input:focus,textarea:focus,select:focus{outline:none}
 </div>
 </div>
 
+<!-- Navegação Inferior -->
 <nav class="fixed bottom-0 left-0 right-0 z-40 bg-charcoal-950/95 backdrop-blur-md border-t border-white/5">
 <div class="max-w-md mx-auto flex items-center justify-around py-2 px-1">
 <button onclick="nav('home')" class="tb on flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-colors" data-t="home"><iconify-icon icon="lucide:home" width="20"></iconify-icon><span class="text-[10px] font-medium">Início</span><div class="dot w-1 h-1 rounded-full bg-gold-400 opacity-0 transition-opacity"></div></button>
@@ -89,444 +95,6 @@ input:focus,textarea:focus,select:focus{outline:none}
 </div>
 </nav>
 </div>
-
-<script>
-/* ===== PWA ===== */
-var manifest={name:"IncubaPro",short_name:"IncubaPro",description:"Assistente completo para incubação de ovos",start_url:location.href,display:"standalone",background_color:"#050505",theme_color:"#050505",orientation:"portrait",icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%23050505'/%3E%3Crect x='60' y='40' width='72' height='96' rx='36' fill='%23E6B800'/%3E%3Crect x='76' y='72' width='40' height='48' rx='20' fill='%23050505' opacity='.3'/%3E%3C/svg%3E",sizes:"192x192",type:"image/svg+xml",purpose:"any maskable"}]};
-var mBlob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
-var mLink=document.createElement('link');mLink.rel='manifest';mLink.href=URL.createObjectURL(mBlob);document.head.appendChild(mLink);
-
-/* ===== DADOS ===== */
-var SPECIES=[
-{name:'Galinha',days:21,temp:'37.5-37.8',humid:'55-60',humidLock:'65-70',turns:'3x/dia',emoji:'🐔'},
-{name:'Codorna',days:17,temp:'37.5-37.8',humid:'50-55',humidLock:'60-65',turns:'3x/dia',emoji:'🐣'},
-{name:'Codorna Japonesa',days:17,temp:'37.7',humid:'60',humidLock:'75',turns:'3x/dia',emoji:'🐣'},
-{name:'Pato',days:28,temp:'37.2-37.5',humid:'55-60',humidLock:'70-75',turns:'3-4x/dia',emoji:'🦆'},
-{name:'Marreco',days:35,temp:'37.2-37.5',humid:'55-60',humidLock:'70-75',turns:'3-4x/dia',emoji:'🦆'},
-{name:'Peru',days:28,temp:'37.2-37.5',humid:'55-60',humidLock:'65-70',turns:'3x/dia',emoji:'🦃'},
-{name:'Ganso',days:31,temp:'37.2-37.5',humid:'55-60',humidLock:'70-75',turns:'3-4x/dia',emoji:'🪿'},
-{name:'Faisão',days:24,temp:'37.5-37.8',humid:'55-60',humidLock:'65-70',turns:'3x/dia',emoji:'🦅'},
-{name:'Pavão',days:28,temp:'37.2-37.5',humid:'55-60',humidLock:'65-70',turns:'3x/dia',emoji:'🦚'},
-{name:'Pomba',days:17,temp:'37.8-38.0',humid:'55-60',humidLock:'65-70',turns:'3x/dia',emoji:'🕊️'},
-{name:'Calopsita',days:20,temp:'37.0-37.5',humid:'50',humidLock:'65',turns:'3x/dia',emoji:'🦜'},
-{name:'Periquito',days:18,temp:'37.0',humid:'50',humidLock:'65',turns:'3x/dia',emoji:'🦜'},
-{name:'Avestruz',days:42,temp:'36.0-36.5',humid:'45-50',humidLock:'55-60',turns:'2-3x/dia',emoji:'🦩'}
-];
-var TIPS=[
-'No dia 12, evite abrir a incubadora por mais de 30 segundos.',
-'Virar ovos 3x ao dia em horários regulares melhora a taxa de eclosão.',
-'Umidade abaixo de 50% causa desidratação dos embriões.',
-'Na ovoscopia, ovo claro sem veias é infértil — remova-o.',
-'No lockdown, NÃO vire mais os ovos!',
-'Meça a temperatura na altura dos ovos, não no topo.',
-'Deixe o pintinho secar 12-24h antes de transferir para o criatório.',
-'Lave as mãos antes de manusear os ovos.',
-'Temperatura acima de 39°C por horas pode matar o embrião.',
-'Ovos muito grandes ou muito pequenos têm menor taxa de eclosão.'
-];
-var ESTUFA_ETAPAS=[
-{t:'Antes de ligar a estufa',c:'Escolha um local firme, seco, limpo e protegido de vento, chuva, sol forte e frio excessivo.\n\nEvite colocar a estufa diretamente no chão frio. Use bancada ou mesa.\n\nVerifique se a voltagem é compatível com a tomada.'},
-{t:'Preparando o interior',c:'Coloque bebedouro pequeno e comedouro adequado para pintinhos.\n\nEvite recipientes fundos com água — os pintinhos podem cair e se afogar.\n\nForre o fundo com material limpo e seco.'},
-{t:'Ligando a estufa',c:'Ligue na tomada e aguarde alguns minutos para aquecer.\n\nConfira se a lâmpada/LED e o sistema de aquecimento funcionam normalmente.\n\nSó coloque os pintinhos após o aquecimento completo.'},
-{t:'Quando colocar os pintinhos',c:'Os pintinhos devem estar secos e firmes antes de ir para a estufa.\n\nNÃO coloque pintinhos molhados ou recém-saídos da chocadeira.\n\nObserve o comportamento nos primeiros minutos.'},
-{t:'Temperatura adequada',c:'Amontoados embaixo do calor = pode estar frio.\n\nAfastados, ofegantes, fugindo = pode estar quente demais.\n\nEspalhados, ativos, comendo, bebendo = temperatura ideal.'},
-{t:'Cuidados nos primeiros dias',c:'Mantenha aquecidos e protegidos de correntes de ar.\n\nVerifique água e ração várias vezes ao dia.\n\nTroque água suja. Mantenha o fundo seco.\n\nRetire sujeiras e materiais úmidos.'},
-{t:'Alimentação e água',c:'Use ração inicial própria para pintinhos.\n\nÁgua sempre limpa em bebedouro adequado.\n\nObserve se todos conseguem beber e comer.\n\nPintinhos fracos precisam de atenção especial.'},
-{t:'Higienização',c:'Limpe com frequência para evitar bactérias.\n\nSubstitua forração suja por material limpo.\n\nNÃO jogue água nos componentes elétricos.\n\nDesligue da tomada antes de limpar.'},
-{t:'Tempo na estufa',c:'Varia por espécie, clima e desenvolvimento.\n\nGeralmente: primeiras semanas de vida.\n\nSe ainda amontoados procurando calor, precisam da estufa.\n\nObservar o comportamento é fundamental.'},
-{t:'Cuidados importantes',c:'NÃO deixe em local com vento.\nNÃO coloque excesso de pintinhos.\nNÃO use extensões danificadas.\nNÃO molhe componentes elétricos.\nNÃO deixe sem água ou alimento.\nNÃO misture doentes com saudáveis.\nNÃO use produtos químicos fortes.'},
-{t:'Sinais de atenção',c:'Pintinhos muito fracos ou sem reação.\nSempre amontoados e piando muito.\nOfegantes ou tentando fugir do calor.\nEstufa não aquecendo.\nCheiro de queimado ou falha elétrica.\n\nO acompanhamento diário é essencial.'}
-];
-var FAQS=[
-{q:'Qual a temperatura ideal para codornas?',a:'37,5°C a 37,8°C. Mantenha sempre dentro dessa faixa com variação máxima de ±0,3°C.'},
-{q:'Com que frequência virar os ovos?',a:'No mínimo 3 vezes ao dia (a cada 8 horas). Se tiver rolagem automática, verifique diariamente.'},
-{q:'Posso abrir a chocadeira durante a incubação?',a:'Evite ao máximo, especialmente nos primeiros dias e nos últimos 3. Abertura causa perda de temperatura e umidade.'},
-{q:'Quando parar de virar os ovos?',a:'2-3 dias antes da eclosão prevista. Os pintinhos já estão se posicionando para nascer.'},
-{q:'Como saber se o ovo é fértil?',a:'Ovoscopia a partir do 5º dia contra uma fonte de luz. Ovos férteis mostram veias e área escura. Claros provavelmente são inférteis.'},
-{q:'O que fazer se a energia acabar?',a:'Cubra a chocadeira com cobertores. Até 2-3h os ovos se recuperam. Tempo maior: use gerador ou nobreak.'},
-{q:'Posso misturar espécies diferentes?',a:'Não recomendado. Cada espécie tem temperatura, umidade e tempo diferentes.'},
-{q:'Qual umidade para galinhas?',a:'55% nos primeiros 18 dias. Aumente para 70% nos últimos 3 dias para facilitar a eclosão.'}
-];
-
-/* ===== ESTADO ===== */
-var S;
-try{S=JSON.parse(localStorage.getItem('incubapro_v11'));}catch(e){}
-if(!S||!S.lots){S={lots:[],activeLotId:null,notifications:[],chatHistory:[],apiKey:'',calMonth:new Date().getMonth(),calYear:new Date().getFullYear(),checkedDays:{},alarms:[]};}
-if(!S.chatHistory)S.chatHistory=[];
-if(!S.apiKey)S.apiKey='';
-if(!S.checkedDays)S.checkedDays={};
-if(!S.alarms)S.alarms=[];
-function save(){try{localStorage.setItem('incubapro_v11',JSON.stringify(S));}catch(e){}}
-
-/* ===== UTILS ===== */
-function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function sp(n){for(var i=0;i<SPECIES.length;i++)if(SPECIES[i].name===n)return SPECIES[i];return SPECIES[0];}
-function active(){for(var i=0;i<S.lots.length;i++)if(S.lots[i].id===S.activeLotId&&S.lots[i].status==='active')return S.lots[i];return null;}
-function ds(d){var s=new Date(d),n=new Date();s.setHours(0,0,0,0);n.setHours(0,0,0,0);return Math.floor((n-s)/86400000);}
-function gid(){return Date.now().toString(36)+Math.random().toString(36).substr(2,6);}
-function fmtDate(d){var dt=new Date(d);return dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});}
-function fmtDateFull(d){var dt=new Date(d);return dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});}
-
-function toast(m){var d=document.createElement('div');d.className='fixed top-16 left-1/2 -translate-x-1/2 z-[70] flex items-center gap-2 px-5 py-3 rounded-xl bg-charcoal-900 border border-white/10 backdrop-blur-xl shadow-xl text-sm text-neutral-200 whitespace-nowrap';d.style.animation='slu 0.3s ease, fo 0.3s ease 2s forwards';d.innerHTML='<iconify-icon icon="lucide:check-circle" width="16" class="text-gold-400 shrink-0"></iconify-icon>'+esc(m);document.body.appendChild(d);setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d);},2600);}
-
-/* ===== NOTIFICAÇÕES ===== */
-function addN(t,tp){S.notifications.unshift({text:t,type:tp||'info',time:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),read:false});if(S.notifications.length>30)S.notifications.pop();save();updB();}
-function updB(){var c=0;for(var i=0;i<S.notifications.length;i++)if(!S.notifications[i].read)c++;var el=document.getElementById('badge');if(c>0){el.textContent=c>9?'9+':c;el.classList.remove('hidden');}else{el.classList.add('hidden');}}
-function openNotif(){document.getElementById('notifPanel').classList.remove('hidden');var l=document.getElementById('notifList'),h='';if(!S.notifications.length){h='<div class="text-center py-12"><iconify-icon icon="lucide:bell-off" width="36" class="text-neutral-800 mb-3 block"></iconify-icon><p class="text-xs text-neutral-600">Sem notificações</p></div>';}else{for(var i=0;i<S.notifications.length;i++){var n=S.notifications[i],ic=n.type==='warn'?'lucide:alert-triangle':n.type==='success'?'lucide:check-circle':'lucide:info',cl=n.type==='warn'?'text-amber-400':n.type==='success'?'text-emerald-400':'text-gold-400';h+='<div class="flex gap-3 p-3 rounded-xl '+(n.read?'bg-white/[0.02]':'bg-white/[0.05]')+' border border-white/5 cursor-pointer" onclick="markR('+i+')"><iconify-icon icon="'+ic+'" width="18" class="'+cl+' shrink-0 mt-0.5"></iconify-icon><div class="flex-1 min-w-0"><p class="text-xs leading-relaxed '+(n.read?'text-neutral-600':'text-neutral-300')+'">'+esc(n.text)+'</p><p class="text-[10px] text-neutral-700 mt-1">'+n.time+'</p></div>'+(n.read?'':'<div class="w-2 h-2 rounded-full bg-gold-400 shrink-0 mt-2"></div>')+'</div>';}}l.innerHTML=h;}
-function markR(i){S.notifications[i].read=true;save();updB();openNotif();}
-function closeNotif(){document.getElementById('notifPanel').classList.add('hidden');}
-
-/* ===== MODAIS ===== */
-function openModal(h){document.getElementById('modalContent').innerHTML=h;document.getElementById('modalOverlay').classList.remove('hidden');}
-function closeModal(){document.getElementById('modalOverlay').classList.add('hidden');}
-function showConf(ti,ms,ok,lb){document.getElementById('confirmContent').innerHTML='<div class="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4"><iconify-icon icon="lucide:alert-triangle" width="28" class="text-red-400"></iconify-icon></div><h3 class="text-base font-bold mb-2">'+esc(ti)+'</h3><p class="text-sm text-neutral-400 mb-6 leading-relaxed">'+esc(ms)+'</p><div class="flex gap-3"><button onclick="closeConf()" class="flex-1 py-3 rounded-xl border border-white/10 text-sm font-medium text-neutral-400 hover:text-white transition-all">Cancelar</button><button id="cfmBtn" class="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-sm font-bold transition-all">'+esc(lb||'Excluir')+'</button></div>';closeModal();document.getElementById('confirmOverlay').classList.remove('hidden');document.getElementById('cfmBtn').onclick=function(){closeConf();ok();};}
-function closeConf(){document.getElementById('confirmOverlay').classList.add('hidden');}
-
-/* ===== NAVEGAÇÃO ===== */
-var currentNav='home';
-function nav(p){
-if(p==='more'){openMoreMenu();return;}
-currentNav=p;
-var all=document.querySelectorAll('.scr');for(var i=0;i<all.length;i++)all[i].classList.remove('on');
-var t=document.getElementById('page-'+p);if(t)t.classList.add('on');
-var tabs=document.querySelectorAll('.tb');for(var i=0;i<tabs.length;i++){tabs[i].classList.remove('on');tabs[i].classList.add('text-neutral-500');}
-var at=document.querySelector('.tb[data-t="'+p+'"]');if(at){at.classList.add('on');at.classList.remove('text-neutral-500');}
-var ti={home:'IncubaPro',calendar:'Calendário',ai:'Assistente IA',table:'Tabela Referência',lots:'Meus Lotes',estufa:'Estufa',settings:'Configurações'};
-document.getElementById('hTitle').textContent=ti[p]||'IncubaPro';
-var fn={home:rHome,lots:rLots,calendar:rCal,ai:rAI,table:rTable,estufa:rEstufa,settings:rSettings};
-if(fn[p])fn[p]();
-document.getElementById('mainArea').scrollTop=0;
-}
-
-function openMoreMenu(){
-var h='<div class="bg-charcoal-900 rounded-t-3xl p-5 border-t border-white/5 space-y-1">';
-h+='<div class="w-10 h-1 rounded-full bg-neutral-700 mx-auto mb-4"></div>';
-h+='<button onclick="closeModal();nav(\'estufa\')" class="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors text-left"><div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center"><iconify-icon icon="lucide:thermometer" width="20" class="text-amber-400"></iconify-icon></div><div><p class="text-sm font-semibold">Estufa</p><p class="text-[11px] text-neutral-500">Manual de uso pós-eclosão</p></div></button>';
-h+='<button onclick="closeModal();nav(\'table\')" class="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors text-left"><div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center"><iconify-icon icon="lucide:table-2" width="20" class="text-blue-400"></iconify-icon></div><div><p class="text-sm font-semibold">Tabela Referência</p><p class="text-[11px] text-neutral-500">Dados por espécie</p></div></button>';
-h+='<button onclick="closeModal();openSuporte()" class="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors text-left"><div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center"><iconify-icon icon="lucide:headphones" width="20" class="text-emerald-400"></iconify-icon></div><div><p class="text-sm font-semibold">Suporte</p><p class="text-[11px] text-neutral-500">Vídeos, dúvidas e manuais</p></div></button>';
-h+='<button onclick="closeModal();nav(\'settings\')" class="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors text-left"><div class="w-10 h-10 rounded-xl bg-neutral-500/10 flex items-center justify-center"><iconify-icon icon="lucide:settings" width="20" class="text-neutral-400"></iconify-icon></div><div><p class="text-sm font-semibold">Configurações</p><p class="text-[11px] text-neutral-500">API Key, notificações e mais</p></div></button>';
-h+='</div>';
-openModal(h);
-}
-
-function openSuporte(){
-var h='<div class="bg-charcoal-900 rounded-t-3xl p-5 border-t border-white/5 space-y-4" style="max-height:80vh;overflow-y:auto">';
-h+='<div class="flex items-center justify-between mb-2"><h3 class="text-base font-bold">Suporte</h3><button onclick="closeModal()" class="text-neutral-500 hover:text-white"><iconify-icon icon="lucide:x" width="20"></iconify-icon></button></div>';
-h+='<div class="flex gap-2"><button onclick="swSupTab(\'vid\',this)" class="sup-tab flex-1 py-2.5 rounded-xl text-xs font-semibold bg-gold-gradient text-charcoal-900">Vídeos</button><button onclick="swSupTab(\'faq\',this)" class="sup-tab flex-1 py-2.5 rounded-xl text-xs font-semibold bg-charcoal-800 text-neutral-400">Dúvidas</button></div>';
-h+='<div id="supVid">';
-var vids=[{t:'Como configurar o termostato',c:'Como Usar',d:'3:45'},{t:'Primeira limpeza da chocadeira',c:'Manutenção',d:'5:12'},{t:'Como fazer rolagem dos ovos',c:'Técnica',d:'4:20'},{t:'Ovoscopia passo a passo',c:'Técnica',d:'6:30'}];
-for(var i=0;i<vids.length;i++){var v=vids[i];h+='<div class="lot-card bg-charcoal-800 rounded-xl overflow-hidden border border-white/5 mb-3 cursor-pointer" onclick="toast(\'Vídeo em breve!\')"><div class="w-full aspect-video bg-charcoal-950 flex items-center justify-center relative"><img src="https://picsum.photos/seed/sup'+i+'/480/270.jpg" class="w-full h-full object-cover opacity-40"><div class="absolute w-12 h-12 rounded-full bg-gold-gradient flex items-center justify-center shadow-lg"><iconify-icon icon="lucide:play" width="20" class="text-charcoal-900 ml-0.5"></iconify-icon></div></div><div class="p-3"><p class="text-sm font-semibold">'+v.t+'</p><p class="text-[11px] text-neutral-500">'+v.c+' · '+v.d+'</p></div></div>';}
-h+='</div>';
-h+='<div id="supFaq" class="hidden">';
-for(var i=0;i<FAQS.length;i++){var f=FAQS[i];h+='<div class="border border-white/5 rounded-xl mb-2 overflow-hidden"><button onclick="this.nextElementSibling.classList.toggle(\'hidden\');this.querySelector(\'iconify-icon\').style.transform=this.nextElementSibling.classList.contains(\'hidden\')?\'\':\'rotate(180deg)\'" class="w-full flex items-center justify-between p-4 text-left text-sm font-semibold hover:text-gold-400 transition-colors"><span>'+f.q+'</span><iconify-icon icon="lucide:chevron-down" width="16" class="text-neutral-600 transition-transform"></iconify-icon></button><div class="hidden px-4 pb-4"><p class="text-xs text-neutral-400 leading-relaxed">'+f.a+'</p></div></div>';}
-h+='</div>';
-h+='</div>';
-openModal(h);
-}
-function swSupTab(t,btn){document.querySelectorAll('.sup-tab').forEach(function(b){b.className='sup-tab flex-1 py-2.5 rounded-xl text-xs font-semibold bg-charcoal-800 text-neutral-400';});btn.className='sup-tab flex-1 py-2.5 rounded-xl text-xs font-semibold bg-gold-gradient text-charcoal-900';document.getElementById('supVid').classList.toggle('hidden',t!=='vid');document.getElementById('supFaq').classList.toggle('hidden',t!=='faq');}
-
-/* ===== HOME ===== */
-function rHome(){
-var pg=document.getElementById('page-home'),act=active(),h='';
-if(!act){
-h+='<div class="text-center pt-8 pb-6"><div class="w-20 h-20 rounded-full bg-charcoal-900 border border-white/10 flex items-center justify-center mx-auto mb-5"><iconify-icon icon="lucide:egg" width="32" class="text-neutral-700"></iconify-icon></div><h2 class="text-lg font-bold mb-2">Nenhum lote ativo</h2><p class="text-xs text-neutral-500 mb-6 max-w-xs mx-auto leading-relaxed">Crie um lote de incubação para acompanhar o progresso dia a dia</p><button onclick="nav(\'lots\')" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gold-gradient text-sm font-bold text-charcoal-900"><iconify-icon icon="lucide:plus" width="16"></iconify-icon>Criar Lote</button></div>';
-}else{
-var s=sp(act.species),dia=Math.max(1,Math.min(ds(act.startDate)+1,s.days)),pct=Math.round((dia/s.days)*100),faltam=Math.max(0,s.days-dia);
-h+='<div class="bg-charcoal-900 rounded-2xl p-5 border border-white/5"><div class="flex items-center justify-between mb-4"><div class="flex items-center gap-3"><div class="w-12 h-12 rounded-xl bg-gold-500/10 flex items-center justify-center text-2xl">'+s.emoji+'</div><div><h3 class="text-base font-bold">'+esc(act.name)+'</h3><p class="text-[11px] text-neutral-500">'+act.eggCount+' ovos · '+s.name+'</p></div></div><span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400">ATIVO</span></div>';
-h+='<div class="flex items-end gap-3 mb-3"><span class="text-3xl font-bold text-gold-400">'+pct+'%</span><span class="text-xs text-neutral-500 mb-1">Dia '+dia+' de '+s.days+'</span></div>';
-h+='<div class="w-full h-2 bg-charcoal-800 rounded-full overflow-hidden mb-2"><div class="h-full bg-gold-gradient rounded-full transition-all duration-700" style="width:'+pct+'%"></div></div>';
-h+='<div class="flex justify-between text-[11px] text-neutral-500"><span>Faltam '+faltam+' dias</span><span>Eclosão: '+fmtDate(new Date(new Date(act.startDate).getTime()+s.days*86400000))+'</span></div></div>';
-
-var dica=TIPS[Math.floor(Math.random()*TIPS.length)];
-h+='<div class="bg-charcoal-900 rounded-2xl p-4 border border-white/5 flex gap-3"><div class="w-10 h-10 rounded-xl bg-gold-500/10 flex items-center justify-center shrink-0"><iconify-icon icon="lucide:lightbulb" width="18" class="text-gold-400"></iconify-icon></div><div><p class="text-[11px] font-semibold text-gold-400 mb-1">Dica do dia</p><p class="text-xs text-neutral-400 leading-relaxed">'+dica+'</p></div></div>';
-
-var ctx='';if(dia<=3)ctx='Evite abrir a chocadeira. Mantenha temperatura e umidade estáveis.';else if(dia<=s.days-3)ctx='Continue virando '+s.turns+'. Verifique temperatura 2x ao dia.';else ctx='LOCKDOWN! Aumente umidade para '+s.humidLock+'%. NÃO vire os ovos.';
-h+='<div class="bg-charcoal-900 rounded-2xl p-4 border border-white/5"><p class="text-[11px] font-semibold text-neutral-300 mb-2">Status Atual</p><p class="text-xs text-neutral-500 leading-relaxed">'+ctx+'</p>';
-h+='<div class="grid grid-cols-3 gap-3 mt-4"><div class="text-center p-2.5 bg-charcoal-800 rounded-xl"><p class="text-base font-bold text-gold-400">'+s.temp+'°C</p><p class="text-[10px] text-neutral-600">Temp</p></div><div class="text-center p-2.5 bg-charcoal-800 rounded-xl"><p class="text-base font-bold text-blue-400">'+s.humid+'%</p><p class="text-[10px] text-neutral-600">Umidade</p></div><div class="text-center p-2.5 bg-charcoal-800 rounded-xl"><p class="text-base font-bold text-emerald-400">'+s.turns.replace('x/dia','')+'</p><p class="text-[10px] text-neutral-600">Virar/dia</p></div></div></div>';
-
-h+='<div class="grid grid-cols-2 gap-3">';
-h+='<button onclick="openDetail('+JSON.stringify(act.id).replace(/"/g,'&quot;')+')" class="bg-charcoal-900 rounded-2xl p-4 border border-white/5 text-left hover:border-white/10 transition-all"><iconify-icon icon="lucide:bar-chart-3" width="18" class="text-gold-400 mb-2 block"></iconify-icon><p class="text-sm font-semibold">Detalhes</p><p class="text-[11px] text-neutral-500">Ver progresso completo</p></button>';
-h+='<button onclick="nav(\'ai\')" class="bg-charcoal-900 rounded-2xl p-4 border border-white/5 text-left hover:border-white/10 transition-all"><iconify-icon icon="lucide:bot" width="18" class="text-gold-400 mb-2 block"></iconify-icon><p class="text-sm font-semibold">Perguntar IA</p><p class="text-[11px] text-neutral-500">Dúvidas sobre o lote</p></button>';
-h+='</div>';
-}
-
-/* Lotes recentes */
-var recent=S.lots.slice().reverse().filter(function(l){return l.status!=='active';}).slice(0,3);
-if(recent.length){
-h+='<p class="text-xs font-semibold text-neutral-600 uppercase tracking-wider pt-2">Recentes</p>';
-for(var i=0;i<recent.length;i++){var l=recent[i],s2=sp(l.species);
-h+='<div class="lot-card bg-charcoal-900 rounded-xl p-4 border border-white/5 flex items-center gap-3 cursor-pointer" onclick="openDetail('+JSON.stringify(l.id).replace(/"/g,'&quot;')+')"><span class="text-xl">'+s2.emoji+'</span><div class="flex-1 min-w-0"><p class="text-sm font-semibold truncate">'+esc(l.name)+'</p><p class="text-[11px] text-neutral-500">'+l.eggCount+' ovos · '+fmtDate(l.startDate)+'</p></div><span class="text-[10px] font-bold px-2 py-0.5 rounded-full '+(l.status==='done'?'bg-emerald-500/10 text-emerald-400':'bg-red-500/10 text-red-400')+'">'+(l.status==='done'?'Concluído':'Cancelado')+'</span></div>';}
-}
-pg.innerHTML=h;
-}
-
-function openDetail(id){
-var lot=null;for(var i=0;i<S.lots.length;i++)if(S.lots[i].id===id){lot=S.lots[i];break;}
-if(!lot)return;
-var s=sp(lot.species),dia=Math.max(1,Math.min(ds(lot.startDate)+1,s.days)),pct=Math.round((dia/s.days)*100);
-var h='<div class="bg-charcoal-900 rounded-t-3xl p-5 border-t border-white/5 space-y-4" style="max-height:85vh;overflow-y:auto">';
-h+='<div class="flex items-center justify-between mb-1"><h3 class="text-base font-bold">'+esc(lot.name)+'</h3><button onclick="closeModal()" class="text-neutral-500 hover:text-white"><iconify-icon icon="lucide:x" width="20"></iconify-icon></button></div>';
-h+='<div class="flex items-center gap-3"><span class="text-3xl">'+s.emoji+'</span><div><p class="text-sm font-semibold">'+s.name+' · '+lot.eggCount+' ovos</p><p class="text-[11px] text-neutral-500">Início: '+fmtDateFull(lot.startDate)+' · Eclosão: '+fmtDate(new Date(new Date(lot.startDate).getTime()+s.days*86400000))+'</p></div></div>';
-h+='<div class="flex items-end gap-3"><span class="text-4xl font-bold text-gold-400">'+pct+'%</span><span class="text-sm text-neutral-500 mb-1">Dia '+dia+' de '+s.days+'</span></div>';
-h+='<div class="w-full h-3 bg-charcoal-800 rounded-full overflow-hidden"><div class="h-full bg-gold-gradient rounded-full" style="width:'+pct+'%"></div></div>';
-h+='<div class="grid grid-cols-2 gap-3">';
-h+='<div class="bg-charcoal-800 rounded-xl p-4 text-center"><iconify-icon icon="lucide:thermometer" width="20" class="text-gold-400 mb-2 block"></iconify-icon><p class="text-lg font-bold">'+s.temp+'°C</p><p class="text-[10px] text-neutral-500">Temperatura</p></div>';
-h+='<div class="bg-charcoal-800 rounded-xl p-4 text-center"><iconify-icon icon="lucide:droplets" width="20" class="text-blue-400 mb-2 block"></iconify-icon><p class="text-lg font-bold">'+s.humid+'%</p><p class="text-[10px] text-neutral-500">Umidade</p></div>';
-h+='<div class="bg-charcoal-800 rounded-xl p-4 text-center"><iconify-icon icon="lucide:rotate-cw" width="20" class="text-emerald-400 mb-2 block"></iconify-icon><p class="text-lg font-bold">'+s.turns+'</p><p class="text-[10px] text-neutral-500">Virar ovos</p></div>';
-h+='<div class="bg-charcoal-800 rounded-xl p-4 text-center"><iconify-icon icon="lucide:lock" width="20" class="text-amber-400 mb-2 block"></iconify-icon><p class="text-lg font-bold">'+s.humidLock+'%</p><p class="text-[10px] text-neutral-500">Umidade lockdown</p></div>';
-h+='</div>';
-if(lot.status==='active'){
-h+='<div class="flex gap-2"><button onclick="closeModal();S.activeLotId=null;for(var i=0;i<S.lots.length;i++)if(S.lots[i].id===\''+lot.id+'\')S.lots[i].status=\'cancelled\';save();nav(\'home\');toast(\'Lote cancelado\')" class="flex-1 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-sm font-semibold text-red-400">Cancelar Lote</button><button onclick="closeModal();for(var i=0;i<S.lots.length;i++)if(S.lots[i].id===\''+lot.id+'\'){S.lots[i].status=\'done\';S.activeLotId=null;}save();addN(\'Lote \\\''+esc(lot.name)+'\\\' concluído!\',\'success\');nav(\'home\');toast(\'Lote concluído!\')" class="flex-1 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-sm font-semibold text-emerald-400">Concluir</button></div>';
-}
-h+='</div>';
-openModal(h);
-}
-
-/* ===== LOTES ===== */
-function rLots(){
-var pg=document.getElementById('page-lots'),h='';
-h+='<div class="flex items-center justify-between mb-2"><div><h2 class="text-lg font-bold">Meus Lotes</h2><p class="text-[11px] text-neutral-500">'+S.lots.length+' lote(s) registrado(s)</p></div><button onclick="openNewLot()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gold-gradient text-sm font-bold text-charcoal-900"><iconify-icon icon="lucide:plus" width="16"></iconify-icon>Novo</button></div>';
-
-if(!S.lots.length){
-h+='<div class="text-center py-16"><iconify-icon icon="lucide:layers" width="40" class="text-neutral-800 mb-3 block"></iconify-icon><p class="text-sm text-neutral-600">Nenhum lote criado ainda</p></div>';
-}else{
-for(var i=S.lots.length-1;i>=0;i--){var l=S.lots[i],s=sp(l.species),dia=Math.max(1,Math.min(ds(l.startDate)+1,s.days)),pct=Math.round((dia/s.days)*100);
-var stCl,stTx,bdTx;
-if(l.status==='active'){stCl='bg-emerald-500/10 text-emerald-400';stTx='Ativo · Dia '+dia;bdTx='border-l-2 border-l-emerald-400';}
-else if(l.status==='done'){stCl='bg-blue-500/10 text-blue-400';stTx='Concluído';bdTx='border-l-2 border-l-blue-400';}
-else{stCl='bg-neutral-500/10 text-neutral-500';stTx='Cancelado';bdTx='border-l-2 border-l-neutral-700';}
-
-h+='<div class="lot-card bg-charcoal-900 rounded-xl p-4 border border-white/5 '+bdTx+' mb-3 cursor-pointer" onclick="openDetail('+JSON.stringify(l.id).replace(/"/g,'&quot;')+')">';
-h+='<div class="flex items-center justify-between mb-3"><div class="flex items-center gap-3"><span class="text-xl">'+s.emoji+'</span><div><p class="text-sm font-bold">'+esc(l.name)+'</p><p class="text-[11px] text-neutral-500">'+l.eggCount+' ovos · '+s.name+' · '+fmtDate(l.startDate)+'</p></div></div><span class="text-[10px] font-bold px-2 py-0.5 rounded-full '+stCl+'">'+stTx+'</span></div>';
-if(l.status==='active'){h+='<div class="w-full h-1.5 bg-charcoal-800 rounded-full overflow-hidden"><div class="h-full bg-gold-gradient rounded-full" style="width:'+pct+'%"></div></div><p class="text-[10px] text-neutral-600 mt-1.5 text-right">'+pct+'%</p>';}
-h+='</div>';}
-}
-pg.innerHTML=h;
-}
-
-function openNewLot(){
-var h='<div class="bg-charcoal-900 rounded-t-3xl p-5 border-t border-white/5 space-y-4" style="max-height:85vh;overflow-y:auto">';
-h+='<div class="flex items-center justify-between mb-1"><h3 class="text-base font-bold">Novo Lote</h3><button onclick="closeModal()" class="text-neutral-500 hover:text-white"><iconify-icon icon="lucide:x" width="20"></iconify-icon></button></div>';
-h+='<div><label class="text-xs font-semibold text-neutral-400 block mb-1.5">Nome do Lote</label><input type="text" id="lotName" placeholder="Ex: Codornas Julho 2025" class="w-full bg-charcoal-800 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-600 focus:border-gold-500/50 transition-colors"></div>';
-h+='<div><label class="text-xs font-semibold text-neutral-400 block mb-1.5">Espécie</label><select id="lotSpecies" class="w-full bg-charcoal-800 border border-white/10 rounded-xl px-4 py-3 text-sm text-white appearance-none focus:border-gold-500/50 transition-colors">';
-for(var i=0;i<SPECIES.length;i++)h+='<option value="'+SPECIES[i].name+'">'+SPECIES[i].emoji+' '+SPECIES[i].name+' ('+SPECIES[i].days+' dias)</option>';
-h+='</select></div>';
-h+='<div><label class="text-xs font-semibold text-neutral-400 block mb-1.5">Quantidade de Ovos</label><input type="number" id="lotEggs" value="50" min="1" max="999" class="w-full bg-charcoal-800 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-600 focus:border-gold-500/50 transition-colors"></div>';
-h+='<div><label class="text-xs font-semibold text-neutral-400 block mb-1.5">Data de Início</label><input type="date" id="lotDate" class="w-full bg-charcoal-800 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 transition-colors"></div>';
-h+='<button onclick="createLot()" class="w-full py-3.5 rounded-xl bg-gold-gradient text-sm font-bold text-charcoal-900 mt-2">Criar Lote</button>';
-h+='</div>';
-openModal(h);
-document.getElementById('lotDate').value=new Date().toISOString().split('T')[0];
-}
-
-function createLot(){
-var name=document.getElementById('lotName').value.trim();
-var species=document.getElementById('lotSpecies').value;
-var eggs=parseInt(document.getElementById('lotEggs').value)||50;
-var date=document.getElementById('lotDate').value;
-if(!name){toast('Dê um nome ao lote');return;}
-if(!date){toast('Selecione a data de início');return;}
-var lot={id:gid(),name:name,species:species,eggCount:eggs,startDate:date,status:'active'};
-S.lots.push(lot);S.activeLotId=lot.id;save();closeModal();addN('Lote "'+name+'" criado com '+eggs+' ovos','success');toast('Lote criado!');nav('home');
-}
-
-/* ===== CALENDÁRIO ===== */
-function rCal(){
-var pg=document.getElementById('page-calendar'),h='';
-var meses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-h+='<div class="flex items-center justify-between mb-4"><button onclick="S.calMonth--;if(S.calMonth<0){S.calMonth=11;S.calYear--;}save();rCal()" class="w-9 h-9 rounded-xl bg-charcoal-900 border border-white/5 flex items-center justify-center text-neutral-400 hover:text-gold-400 transition-colors"><iconify-icon icon="lucide:chevron-left" width="18"></iconify-icon></button><span class="text-sm font-bold">'+meses[S.calMonth]+' '+S.calYear+'</span><button onclick="S.calMonth++;if(S.calMonth>11){S.calMonth=0;S.calYear++;}save();rCal()" class="w-9 h-9 rounded-xl bg-charcoal-900 border border-white/5 flex items-center justify-center text-neutral-400 hover:text-gold-400 transition-colors"><iconify-icon icon="lucide:chevron-right" width="18"></iconify-icon></button></div>';
-
-var primeiro=new Date(S.calYear,S.calMonth,1).getDay();
-var total=new Date(S.calYear,S.calMonth+1,0).getDate();
-var hoje=new Date();hoje.setHours(0,0,0,0);
-
-var activeDates={};
-S.lots.forEach(function(l){if(l.status!=='active')return;var s=sp(l.species);for(var d=0;d<s.days;d++){var dt=new Date(l.startDate);dt.setDate(dt.getDate()+d);var key=dt.toISOString().split('T')[0];activeDates[key]=l;}});
-
-h+='<div class="grid grid-cols-7 gap-1 mb-2">';
-var diasSem=['D','S','T','Q','Q','S','S'];
-for(var i=0;i<7;i++)h+='<div class="text-center text-[10px] font-semibold text-neutral-600 py-1">'+diasSem[i]+'</div>';
-h+='</div><div class="grid grid-cols-7 gap-1">';
-for(var i=0;i<primeiro;i++)h+='<div></div>';
-for(var d=1;d<=total;d++){
-var key=S.calYear+'-'+String(S.calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-var isToday=hoje.toISOString().split('T')[0]===key;
-var hasLot=activeDates[key];
-var cls='text-center py-2 rounded-lg text-sm ';
-if(hasLot)cls+='bg-gold-500 text-charcoal-900 font-bold';
-else if(isToday)cls+='bg-gold-500/10 text-gold-400 font-bold';
-else cls+='text-neutral-500';
-h+='<div class="'+cls+'">'+d+'</div>';
-}
-h+='</div>';
-
-h+='<div class="mt-5 space-y-2">';
-var actLots=S.lots.filter(function(l){return l.status==='active';});
-if(!actLots.length){h+='<p class="text-center text-xs text-neutral-600 py-8">Nenhum lote ativo no calendário</p>';}
-else{actLots.forEach(function(l){var s=sp(l.species);h+='<div class="bg-charcoal-900 rounded-xl p-3 border border-white/5 flex items-center gap-3 cursor-pointer lot-card" onclick="openDetail('+JSON.stringify(l.id).replace(/"/g,'&quot;')+')"><span class="text-lg">'+s.emoji+'</span><div class="flex-1"><p class="text-sm font-semibold">'+esc(l.name)+'</p><p class="text-[11px] text-neutral-500">'+fmtDate(l.startDate)+' → '+fmtDate(new Date(new Date(l.startDate).getTime()+s.days*86400000))+'</p></div></div>';});}
-h+='</div>';
-pg.innerHTML=h;
-}
-
-/* ===== TABELA REFERÊNCIA ===== */
-function rTable(){
-var pg=document.getElementById('page-table'),h='';
-h+='<h2 class="text-lg font-bold mb-1">Tabela de Referência</h2><p class="text-[11px] text-neutral-500 mb-4">Dados de incubação por espécie</p>';
-h+='<div class="bg-charcoal-900 rounded-2xl border border-white/5 overflow-hidden">';
-h+='<div class="overflow-x-auto"><table class="w-full text-xs"><thead><tr class="border-b border-white/5"><th class="text-left p-3 text-neutral-500 font-semibold">Espécie</th><th class="text-center p-3 text-neutral-500 font-semibold">Dias</th><th class="text-center p-3 text-neutral-500 font-semibold">Temp</th><th class="text-center p-3 text-neutral-500 font-semibold">Umidade</th><th class="text-center p-3 text-neutral-500 font-semibold">Lockdown</th></tr></thead><tbody>';
-for(var i=0;i<SPECIES.length;i++){var s=SPECIES[i];
-h+='<tr class="border-b border-white/[0.03] hover:bg-white/[0.02]"><td class="p-3 font-semibold"><span class="mr-1.5">'+s.emoji+'</span>'+s.name+'</td><td class="text-center p-3 text-gold-400 font-bold">'+s.days+'</td><td class="text-center p-3 text-neutral-300">'+s.temp+'°C</td><td class="text-center p-3 text-neutral-300">'+s.humid+'%</td><td class="text-center p-3 text-neutral-300">'+s.humidLock+'%</td></tr>';}
-h+='</tbody></table></div></div>';
-h+='<div class="bg-charcoal-900 rounded-2xl p-4 border border-white/5 mt-4"><p class="text-[11px] font-semibold text-neutral-400 mb-2">Legenda</p><p class="text-[11px] text-neutral-500 leading-relaxed"><span class="text-gold-400 font-semibold">Temp</span> = Temperatura ideal &middot; <span class="text-gold-400 font-semibold">Umidade</span> = 1ª fase &middot; <span class="text-gold-400 font-semibold">Lockdown</span> = Últimos 2-3 dias (aumentar umidade e parar de virar)</p></div>';
-pg.innerHTML=h;
-}
-
-/* ===== ESTUFA ===== */
-function rEstufa(){
-var pg=document.getElementById('page-estufa'),h='';
-h+='<div class="bg-charcoal-900 rounded-2xl p-5 border border-white/5"><div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 rounded-xl bg-gold-gradient flex items-center justify-center"><iconify-icon icon="lucide:book-open" width="18" class="text-charcoal-900"></iconify-icon></div><div><h2 class="text-base font-bold">Manual da Estufa INCUBAPRO</h2><p class="text-[11px] text-neutral-500">Guia completo pós-eclosão</p></div></div><p class="text-xs text-neutral-400 leading-relaxed">A estufa mantém os pintinhos aquecidos e protegidos nos primeiros dias de vida.</p></div>';
-
-h+='<div class="bg-charcoal-900 rounded-2xl p-4 border border-white/5 mb-4"><p class="text-xs font-semibold text-neutral-400 mb-3">Temperatura Recomendada</p><div class="flex items-center justify-center gap-6"><div class="text-center"><p class="text-3xl font-bold text-gold-400">35.6°C</p><p class="text-[10px] text-neutral-500 mt-1"><iconify-icon icon="lucide:arrow-up" width="12" class="text-gold-400"></iconify-icon> Seta para cima</p></div><div class="text-center"><p class="text-3xl font-bold text-gold-400">36.0°C</p><p class="text-[10px] text-neutral-500 mt-1"><iconify-icon icon="lucide:arrow-down" width="12" class="text-gold-400"></iconify-icon> Seta para baixo</p></div></div><div class="mt-3 p-3 bg-red-500/10 rounded-xl flex gap-2"><iconify-icon icon="lucide:alert-triangle" width="14" class="text-red-400 shrink-0 mt-0.5"></iconify-icon><p class="text-[10px] text-red-400 leading-relaxed">Não altere sem orientação. Temp baixa = frio. Temp alta = estresse ou morte.</p></div></div>';
-
-for(var i=0;i<ESTUFA_ETAPAS.length;i++){var e=ESTUFA_ETAPAS[i];
-h+='<div class="bg-charcoal-900 rounded-xl border border-white/5 overflow-hidden mb-2"><button onclick="this.nextElementSibling.classList.toggle(\'hidden\');this.querySelector(\'iconify-icon\').style.transform=this.nextElementSibling.classList.contains(\'hidden\')?\'\':\'rotate(180deg)\'" class="w-full flex items-center gap-3 p-4 text-left"><div class="w-8 h-8 rounded-lg bg-gold-500/10 flex items-center justify-center text-xs font-bold text-gold-400 shrink-0">'+(i+1)+'</div><span class="flex-1 text-sm font-semibold">'+e.t+'</span><iconify-icon icon="lucide:chevron-down" width="14" class="text-neutral-600 transition-transform"></iconify-icon></button><div class="hidden px-4 pb-4"><p class="text-xs text-neutral-400 leading-relaxed whitespace-pre-line">'+e.c+'</p></div></div>';}
-pg.innerHTML=h;
-}
-
-/* ===== ASSISTENTE IA (COM API GEMINI) ===== */
-function rAI(){
-var pg=document.getElementById('page-ai'),h='';
-h+='<div class="flex items-center gap-2 mb-3"><div class="w-2 h-2 rounded-full '+(S.apiKey?'bg-emerald-400 pd':'bg-neutral-600')+'"></div><span class="text-[11px] font-medium '+(S.apiKey?'text-emerald-400':'text-neutral-600')+'">'+(S.apiKey?'Conectado à IA':'API não configurada')+'</span></div>';
-h+='<div id="chatBox" class="flex-1 overflow-y-auto space-y-3 pb-4" style="max-height:calc(100vh - 230px)">';
-
-if(!S.chatHistory.length){
-h+='<div class="msg flex gap-3"><div class="w-8 h-8 rounded-full bg-gold-gradient flex items-center justify-center shrink-0"><iconify-icon icon="lucide:bot" width="16" class="text-charcoal-900"></iconify-icon></div><div class="bg-charcoal-900 border border-white/5 rounded-2xl rounded-tl-md px-4 py-3 max-w-[85%]"><p class="text-sm leading-relaxed text-neutral-200">Olá! Sou a IA do IncubaPro. Posso te ajudar com:</p><div class="flex flex-wrap gap-2 mt-3">';
-var qk=['Temperatura ideal por espécie','Como fazer ovoscopia','Umidade na incubação','Problemas na eclosão','Cuidados pós-eclosão','Doenças em pintinhos'];
-for(var i=0;i<qk.length;i++)h+='<button onclick="sendQ(\''+qk[i]+'\')" class="text-[11px] px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-neutral-400 hover:border-gold-500/50 hover:text-gold-400 transition-all">'+qk[i]+'</button>';
-h+='</div></div></div>';
-}else{
-for(var i=0;i<S.chatHistory.length;i++){var m=S.chatHistory[i];
-if(m.role==='user'){h+='<div class="msg flex justify-end"><div class="bg-gold-gradient rounded-2xl rounded-tr-md px-4 py-3 max-w-[80%]"><p class="text-sm leading-relaxed text-charcoal-900 font-medium">'+esc(m.text)+'</p></div></div>';}
-else{h+='<div class="msg flex gap-3"><div class="w-8 h-8 rounded-full bg-gold-gradient flex items-center justify-center shrink-0"><iconify-icon icon="lucide:bot" width="16" class="text-charcoal-900"></iconify-icon></div><div class="bg-charcoal-900 border border-white/5 rounded-2xl rounded-tl-md px-4 py-3 max-w-[85%]"><p class="text-sm leading-relaxed text-neutral-200">'+fmtAI(m.text)+'</p></div></div>';}}}
-h+='</div>';
-
-h+='<div class="shrink-0 pt-2 border-t border-white/5">';
-if(!S.apiKey){h+='<button onclick="nav(\'settings\')" class="w-full py-3.5 rounded-xl bg-charcoal-900 border border-white/10 text-sm font-medium text-neutral-400 hover:border-gold-500/50 hover:text-gold-400 transition-all flex items-center justify-center gap-2"><iconify-icon icon="lucide:key" width="16"></iconify-icon>Configurar API Key para usar a IA</button>';}
-else{h+='<div class="flex gap-2"><input type="text" id="chatIn" placeholder="Pergunte sobre incubação..." class="flex-1 bg-charcoal-900 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-600 focus:border-gold-500/50 transition-colors" onkeydown="if(event.key===\'Enter\')sendChat()"><button onclick="sendChat()" id="sendBtn" class="w-12 h-12 rounded-xl bg-gold-gradient flex items-center justify-center hover:opacity-90 transition-all shrink-0"><iconify-icon icon="lucide:send" width="18" class="text-charcoal-900"></iconify-icon></button></div>';}
-h+='</div>';
-pg.innerHTML=h;
-var cb=document.getElementById('chatBox');if(cb)cb.scrollTop=cb.scrollHeight;
-}
-
-function fmtAI(t){if(!t)return'';return t.replace(/\*\*(.*?)\*\*/g,'<strong class="text-gold-300">$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/\n/g,'<br>').replace(/• /g,'<span class="text-gold-400 mr-1">•</span>').replace(/(\d+)\.\s/g,'<span class="text-gold-400 mr-1">$1.</span>');}
-
-function sendQ(t){sendChat(t);}
-
-async function sendChat(override){
-var inp=document.getElementById('chatIn');
-var txt=override||((inp&&inp.value)?inp.value.trim():'');
-if(!txt)return;
-if(inp)inp.value='';
-if(!S.chatHistory)S.chatHistory=[];
-S.chatHistory.push({role:'user',text:txt});save();
-
-var cb=document.getElementById('chatBox');
-var ud=document.createElement('div');ud.className='msg flex justify-end';
-ud.innerHTML='<div class="bg-gold-gradient rounded-2xl rounded-tr-md px-4 py-3 max-w-[80%]"><p class="text-sm leading-relaxed text-charcoal-900 font-medium">'+esc(txt)+'</p></div>';
-cb.appendChild(ud);
-
-var td=document.createElement('div');td.id='typInd';td.className='msg flex gap-3';
-td.innerHTML='<div class="w-8 h-8 rounded-full bg-gold-gradient flex items-center justify-center shrink-0"><iconify-icon icon="lucide:bot" width="16" class="text-charcoal-900"></iconify-icon></div><div class="bg-charcoal-900 border border-white/5 rounded-2xl rounded-tl-md px-4 py-3 flex gap-1.5 items-center"><div class="w-2 h-2 rounded-full bg-gold-400 tp"></div><div class="w-2 h-2 rounded-full bg-gold-400 tp"></div><div class="w-2 h-2 rounded-full bg-gold-400 tp"></div></div>';
-cb.appendChild(td);cb.scrollTop=cb.scrollHeight;
-
-var btn=document.getElementById('sendBtn');
-if(btn){btn.disabled=true;btn.innerHTML='<iconify-icon icon="lucide:loader-2" width="18" class="text-charcoal-900 animate-spin"></iconify-icon>';}
-
-var response='';
-
-if(S.apiKey){
-var sysPrompt='Você é um especialista em incubação artificial de ovos, avicultura e cuidado de pintinhos. Responda em português brasileiro de forma clara e objetiva. Use **negrito** para destacar termos importantes. Use bullet points (•) para listar. Seja preciso com números. Se não for sobre incubação, avise que só ajuda com esse tema.';
-var ctx='Espécies:\n';
-for(var i=0;i<SPECIES.length;i++){var s=SPECIES[i];ctx+=s.emoji+' '+s.name+': '+s.days+' dias, temp '+s.temp+'°C, umidade '+s.humid+'%, lockdown '+s.humidLock+'%, virar '+s.turns+'\n';}
-var act=active();
-if(act){var as2=sp(act.species);ctx+='\nLote ativo: "'+act.name+'" ('+act.species+'), '+act.eggCount+' ovos, dia '+Math.max(1,ds(act.startDate))+' de '+as2.days+'.';}
-
-try{
-var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+S.apiKey,{
-method:'POST',headers:{'Content-Type':'application/json'},
-body:JSON.stringify({contents:[{parts:[{text:sysPrompt+'\n\n'+ctx+'\n\nPergunta: '+txt}]}],generationConfig:{temperature:0.7,maxOutputTokens:1024}})
-});
-var data=await r.json();
-if(data.candidates&&data.candidates[0]&&data.candidates[0].content)response=data.candidates[0].content.parts[0].text;
-else if(data.error)response='Erro na API: '+data.error.message+'. Verifique sua API Key.';
-else response='Não consegui gerar resposta. Tente novamente.';
-}catch(e){response='Erro de conexão. Verifique sua internet.';}
-}else{response='Configure sua API Key do Google Gemini em **Configurações > API do Assistente IA** para conversar com a IA. É gratuito! Acesse aistudio.google.com/apikey';}
-
-var ti=document.getElementById('typInd');if(ti)ti.remove();
-S.chatHistory.push({role:'assistant',text:response});save();
-
-var rd=document.createElement('div');rd.className='msg flex gap-3';
-rd.innerHTML='<div class="w-8 h-8 rounded-full bg-gold-gradient flex items-center justify-center shrink-0"><iconify-icon icon="lucide:bot" width="16" class="text-charcoal-900"></iconify-icon></div><div class="bg-charcoal-900 border border-white/5 rounded-2xl rounded-tl-md px-4 py-3 max-w-[85%]"><p class="text-sm leading-relaxed text-neutral-200">'+fmtAI(response)+'</p></div>';
-cb.appendChild(rd);cb.scrollTop=cb.scrollHeight;
-
-if(btn){btn.disabled=false;btn.innerHTML='<iconify-icon icon="lucide:send" width="18" class="text-charcoal-900"></iconify-icon>';}
-}
-
-/* ===== SETTINGS ===== */
-function rSettings(){
-var pg=document.getElementById('page-settings'),h='';
-h+='<div class="space-y-1 mb-5"><h2 class="text-lg font-bold">Configurações</h2><p class="text-xs text-neutral-500">Personalize seu IncubaPro</p></div>';
-
-/* API KEY */
-h+='<div class="bg-charcoal-900 rounded-2xl p-5 border border-white/5 space-y-4 mb-4">';
-h+='<div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-gold-500/10 flex items-center justify-center"><iconify-icon icon="lucide:bot" width="20" class="text-gold-400"></iconify-icon></div><div><h3 class="text-sm font-bold">API do Assistente IA</h3><p class="text-[11px] text-neutral-500">Google Gemini — gratuito</p></div></div>';
-h+='<div><label class="text-xs font-semibold text-neutral-400 block mb-1.5">Chave da API</label><div class="flex gap-2"><input type="password" id="apiKeyIn" value="'+esc(S.apiKey)+'" placeholder="Cole sua API Key aqui..." class="flex-1 bg-charcoal-800 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-600 focus:border-gold-500/50 transition-colors"><button onclick="var i=document.getElementById(\'apiKeyIn\');if(i.type===\'password\'){i.type=\'text\';}else{i.type=\'password\';}" class="w-12 h-12 rounded-xl bg-charcoal-800 border border-white/10 flex items-center justify-center text-neutral-500 hover:text-gold-400 transition-colors"><iconify-icon icon="lucide:eye-off" width="18" id="eyeIco"></iconify-icon></button></div>';
-h+='<p class="text-[10px] text-neutral-600 leading-relaxed mt-2">Obtenha grátis em <span class="text-gold-400 font-medium">aistudio.google.com/apikey</span>. A chave fica salva apenas no seu dispositivo.</p></div>';
-h+='<div class="flex gap-2"><button onclick="testAPI()" id="testBtn" class="flex-1 py-3 rounded-xl bg-charcoal-800 border border-white/10 text-sm font-medium text-neutral-300 hover:border-gold-500/50 hover:text-gold-400 transition-all flex items-center justify-center gap-2"><iconify-icon icon="lucide:zap" width="16"></iconify-icon>Testar</button><button onclick="saveAPI()" class="flex-1 py-3 rounded-xl bg-gold-gradient text-sm font-bold text-charcoal-900 hover:opacity-90 transition-all flex items-center justify-center gap-2"><iconify-icon icon="lucide:save" width="16"></iconify-icon>Salvar</button></div>';
-h+='<div id="apiRes" class="hidden"></div></div>';
-
-/* Notificações */
-h+='<div class="bg-charcoal-900 rounded-2xl p-5 border border-white/5 mb-4"><div class="flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center"><iconify-icon icon="lucide:bell" width="20" class="text-emerald-400"></iconify-icon></div><div><h3 class="text-sm font-bold">Notificações</h3><p class="text-[11px] text-neutral-500">Alertas do sistema</p></div></div><button onclick="if(\'Notification\'in window)Notification.requestPermission().then(function(p){toast(p===\'granted\'?\'Ativadas!\':\'Negadas\')})" class="text-xs font-medium px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors">Ativar</button></div></div>';
-
-/* Limpar */
-h+='<div class="bg-charcoal-900 rounded-2xl p-5 border border-white/5 mb-4"><div class="flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center"><iconify-icon icon="lucide:trash-2" width="20" class="text-red-400"></iconify-icon></div><div><h3 class="text-sm font-bold">Limpar Dados</h3><p class="text-[11px] text-neutral-500">Remove tudo permanentemente</p></div></div><button onclick="showConf(\'Limpar Tudo?\',\'Todos os lotes, histórico de chat e notificações serão removidos.\',function(){S={lots:[],activeLotId:null,notifications:[],chatHistory:[],apiKey:S.apiKey,calMonth:new Date().getMonth(),calYear:new Date().getFullYear(),checkedDays:{},alarms:[]};save();toast(\'Dados limpos\');nav(\'home\');})" class="text-xs font-medium px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors">Limpar</button></div></div>';
-
-h+='<div class="text-center pt-4 pb-2"><p class="text-[10px] text-neutral-700">IncubaPro v2.0</p></div>';
-pg.innerHTML=h;
-}
-
-function saveAPI(){var v=document.getElementById('apiKeyIn').value.trim();S.apiKey=v;save();toast(v?'API Key salva!':'API Key removida');}
-
-async function testAPI(){
-var key=document.getElementById('apiKeyIn').value.trim();
-var btn=document.getElementById('testBtn');
-var res=document.getElementById('apiRes');
-if(!key){toast('Cole uma API Key antes');return;}
-btn.innerHTML='<iconify-icon icon="lucide:loader-2" width="16" class="animate-spin"></iconify-icon> Testando...';btn.disabled=true;
-try{
-var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+key,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:'Responda apenas: OK'}]}]})});
-if(r.ok){res.className='flex items-center gap-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 mt-3';res.innerHTML='<iconify-icon icon="lucide:check-circle" width="16" class="text-emerald-400"></iconify-icon><span class="text-xs text-emerald-400 font-medium">Conexão OK! IA pronta.</span>';}
-else{var e=await r.json();res.className='flex items-center gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 mt-3';res.innerHTML='<iconify-icon icon="lucide:x-circle" width="16" class="text-red-400"></iconify-icon><span class="text-xs text-red-400 font-medium">Erro: '+(e.error?.message||'Chave inválida')+'</span>';}
-}catch(e){res.className='flex items-center gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 mt-3';res.innerHTML='<iconify-icon icon="lucide:wifi-off" width="16" class="text-red-400"></iconify-icon><span class="text-xs text-red-400 font-medium">Sem internet</span>';}
-res.classList.remove('hidden');
-btn.innerHTML='<iconify-icon icon="lucide:zap" width="16"></iconify-icon> Testar';btn.disabled=false;
-}
-
-/* ===== ALARMES ===== */
-function schedAlarms(lot){var s=sp(lot.species),td=parseInt(s.days),st=new Date(lot.startDate),now=new Date(),na=[];
-var ld=new Date(st);ld.setDate(ld.getDate()+td-3);ld.setHours(7,0,0,0);if(ld>now)na.push({id:lot.id+'_ld',lotId:lot.id,fired:false,time:ld.toISOString(),title:'LOCKDOWN',body:lot.name+' — PARE de virar! Umidade '+s.humidLock+'%'});
-var ec=new Date(st);ec.setDate(ec.getDate()+td);ec.setHours(6,0,0,0);if(ec>now)na.push({id:lot.id+'_ec',lotId:lot.id,fired:false,time:ec.toISOString(),title:'Eclosão!',body:lot.name+' — Hoje é o dia!'});
-S.alarms=S.alarms.filter(function(a){return a.lotId!==lot.id;}).concat(na);save();}
-function checkAlarms(){var now=new Date();for(var i=0;i<S.alarms.length;i++){var a=S.alarms[i];if(!a.fired&&new Date(a.time)<=now){a.fired=true;addN(a.title+': '+a.body,a.title==='LOCKDOWN'?'warn':'success');if('Notification'in window&&Notification.permission==='granted')new Notification(a.title,{body:a.body});}}save();}
-if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();
-setInterval(checkAlarms,30000);checkAlarms();
-
-/* ===== INIT ===== */
-updB();rHome();
-
-/* Agendar alarmes para lotes ativos */
-S.lots.forEach(function(l){if(l.status==='active')schedAlarms(l);});
-</script>
+<script src="app.js"></script>
 </body>
-</html>
+  </html>
