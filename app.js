@@ -1,13 +1,14 @@
-/* ===== DADOS ===== */
 var SPECIES = [
   {name:'Galinha',days:21,temp:'37.5-37.8',humid:'55-60',humidLock:'65-70',turns:'3x/dia',emoji:'🐔'},
+  {name:'Calopsita',days:20,temp:'37.2-37.5',humid:'45-50',humidLock:'55-60',turns:'3-4x/dia',emoji:'🦜'},
   {name:'Codorna',days:17,temp:'37.5-37.8',humid:'50-55',humidLock:'60-65',turns:'3x/dia',emoji:'🐣'},
   {name:'Pato',days:28,temp:'37.2-37.5',humid:'55-60',humidLock:'70-75',turns:'3-4x/dia',emoji:'🦆'},
   {name:'Peru',days:28,temp:'37.2-37.5',humid:'55-60',humidLock:'65-70',turns:'3x/dia',emoji:'🦃'},
   {name:'Marreco',days:28,temp:'37.2-37.5',humid:'55-60',humidLock:'70-75',turns:'3-4x/dia',emoji:'🦆'},
   {name:'Faisão',days:24,temp:'37.5-37.8',humid:'55-60',humidLock:'65-70',turns:'3x/dia',emoji:'🦅'},
   {name:'Pavão',days:28,temp:'37.2-37.5',humid:'55-60',humidLock:'65-70',turns:'3x/dia',emoji:'🦚'},
-  {name:'Ganso',days:31,temp:'37.2-37.5',humid:'55-60',humidLock:'70-75',turns:'3-4x/dia',emoji:'🪿'}
+  {name:'Ganso',days:31,temp:'37.2-37.5',humid:'55-60',humidLock:'70-75',turns:'3-4x/dia',emoji:'🪿'},
+  {name:'Outra',days:21,temp:'37.5',humid:'55-60',humidLock:'65-70',turns:'3x/dia',emoji:'🥚'}
 ];
 
 var TIPS = [
@@ -23,7 +24,6 @@ var TIPS = [
   'Ovos muito grandes ou muito pequenos têm menor taxa de eclosão.'
 ];
 
-/* ===== ESTADO ===== */
 var S;
 try { S = JSON.parse(localStorage.getItem('incubapro_v11')); } catch(e) {}
 if (!S || !S.lots) {
@@ -35,7 +35,6 @@ if (!S.apiKey) S.apiKey = '';
 
 function save() { localStorage.setItem('incubapro_v11', JSON.stringify(S)); }
 
-/* ===== UTILS ===== */
 function esc(s) { if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function sp(n) { for(var i=0;i<SPECIES.length;i++) if(SPECIES[i].name===n) return SPECIES[i]; return SPECIES[0]; }
 function active() { for(var i=0;i<S.lots.length;i++) if(S.lots[i].id===S.activeLotId) return S.lots[i]; return null; }
@@ -51,7 +50,6 @@ function toast(m) {
   setTimeout(function(){ if(d.parentNode) d.parentNode.removeChild(d); }, 2600);
 }
 
-/* ===== NOTIFICAÇÕES ===== */
 function addN(t, tp) {
   S.notifications.unshift({text:t, type:tp||'info', time:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}), read:false});
   if (S.notifications.length > 30) S.notifications.pop();
@@ -91,7 +89,6 @@ function openNotifPanel() {
 function markR(i) { S.notifications[i].read = true; save(); updB(); openNotifPanel(); }
 function closeNotifPanel() { document.getElementById('notifPanel').classList.remove('show'); }
 
-/* ===== ALARMES ===== */
 function schedAlarms(lot) {
   var s = sp(lot.species), td = parseInt(s.days), st = new Date(lot.startDate), now = new Date(), na = [];
   if (lot.autoTurn !== false) {
@@ -146,7 +143,6 @@ function nextAlarm(lid) {
   return nx;
 }
 
-/* ===== MODAIS ===== */
 function openModal(h) {
   document.getElementById('modalContent').innerHTML = h;
   document.getElementById('modalOverlay').classList.add('show');
@@ -159,8 +155,8 @@ function showConf(ti, ms, ok, lb) {
     '<h3 style="font-size:1rem;font-weight:700;margin-bottom:0.5rem">' + esc(ti) + '</h3>' +
     '<p style="font-size:0.875rem;color:#a3a3a3;margin-bottom:1.5rem;line-height:1.6">' + esc(ms) + '</p>' +
     '<div style="display:flex;gap:0.75rem">' +
-    '<button onclick="closeConf()" style="flex:1;padding:0.75rem;border-radius:0.75rem;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;font-weight:500;color:#a3a3a3;background:transparent">Cancelar</button>' +
-    '<button id="cfmBtn" style="flex:1;padding:0.75rem;border-radius:0.75rem;border:none;background:#ef4444;font-size:0.875rem;font-weight:700;color:white">' + esc(lb||'Excluir') + '</button>' +
+    '<button onclick="closeConf()" style="flex:1;padding:0.75rem;border-radius:0.75rem;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;font-weight:500;color:#a3a3a3;background:transparent;cursor:pointer;font-family:inherit">Cancelar</button>' +
+    '<button id="cfmBtn" style="flex:1;padding:0.75rem;border-radius:0.75rem;border:none;background:#ef4444;font-size:0.875rem;font-weight:700;color:white;cursor:pointer;font-family:inherit">' + esc(lb||'Excluir') + '</button>' +
     '</div>';
   closeModal();
   document.getElementById('confirmOverlay').classList.add('show');
@@ -168,7 +164,6 @@ function showConf(ti, ms, ok, lb) {
 }
 function closeConf() { document.getElementById('confirmOverlay').classList.remove('show'); }
 
-/* ===== NAVEGAÇÃO ===== */
 function nav(p) {
   var all = document.querySelectorAll('.scr');
   for (var i=0; i<all.length; i++) all[i].classList.remove('on');
@@ -185,11 +180,10 @@ function nav(p) {
   document.getElementById('mainArea').scrollTop = 0;
 }
 
-/* ===== HOME ===== */
 function rHome() {
   var pg = document.getElementById('page-home'), act = active(), h = '';
   if (!act) {
-    h += '<div style="text-align:center;padding:2rem 0 1.5rem"><div style="width:5rem;height:5rem;border-radius:50%;background:#111;border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem"><iconify-icon icon="lucide:egg" width="32" style="color:#404040"></iconify-icon></div><h2 style="font-size:1.25rem;font-weight:700;margin-bottom:0.5rem">Nenhum lote ativo</h2><p style="font-size:0.875rem;color:#737373;line-height:1.6;max-width:20rem;margin:0 auto 1.5rem">Crie seu primeiro lote para acompanhar toda a incubação.</p><button onclick="openCreateLot()" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.75rem 1.5rem;border-radius:0.75rem;background:linear-gradient(135deg,#F2C94C 0%,#E6B800 100%);color:#050505;font-size:0.875rem;font-weight:700;border:none;cursor:pointer"><iconify-icon icon="lucide:plus" width="18"></iconify-icon>Criar Lote</button></div>';
+    h += '<div style="text-align:center;padding:2rem 0 1.5rem"><div style="width:5rem;height:5rem;border-radius:50%;background:#111;border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem"><iconify-icon icon="lucide:egg" width="32" style="color:#404040"></iconify-icon></div><h2 style="font-size:1.25rem;font-weight:700;margin-bottom:0.5rem">Nenhum lote ativo</h2><p style="font-size:0.875rem;color:#737373;line-height:1.6;max-width:20rem;margin:0 auto 1.5rem">Crie seu primeiro lote para acompanhar toda a incubação.</p><button onclick="openCreateLot()" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.75rem 1.5rem;border-radius:0.75rem;background:linear-gradient(135deg,#F2C94C 0%,#E6B800 100%);color:#050505;font-size:0.875rem;font-weight:700;border:none;cursor:pointer;font-family:inherit"><iconify-icon icon="lucide:plus" width="18"></iconify-icon>Criar Lote</button></div>';
     h += '<div style="display:flex;flex-direction:column;gap:0.75rem"><h3 style="font-size:0.75rem;font-weight:600;color:#525252;text-transform:uppercase;letter-spacing:0.05em">Dicas Rápidas</h3>';
     for (var i=0; i<3; i++) {
       h += '<div style="display:flex;gap:0.75rem;padding:0.875rem;border-radius:0.75rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05)"><iconify-icon icon="lucide:lightbulb" width="16" style="color:#E6B800;flex-shrink:0;margin-top:2px"></iconify-icon><p style="font-size:0.75rem;color:#a3a3a3;line-height:1.5">'+TIPS[i]+'</p></div>';
@@ -219,7 +213,7 @@ function rHome() {
       h += '<div style="padding:0.875rem;border-radius:0.75rem;background:rgba(52,211,153,0.05);border:1px solid rgba(52,211,153,0.2);display:flex;gap:0.75rem"><iconify-icon icon="lucide:party-popper" width="18" style="color:#34d399;flex-shrink:0;margin-top:2px"></iconify-icon><div><p style="font-size:0.75rem;font-weight:700;color:#6ee7b7">Dia da Eclosão!</p><p style="font-size:0.625rem;color:rgba(52,211,153,0.6);margin-top:2px;line-height:1.5">Acompanhe de perto. Não ajude o pintinho a sair do ovo.</p></div></div>';
     }
     h += '</div>';
-    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem"><button onclick="openAddReading()" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.875rem;border-radius:0.75rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);font-size:0.875rem;font-weight:500;color:white;cursor:pointer"><iconify-icon icon="lucide:thermometer" width="16" style="color:#E6B800"></iconify-icon>Registrar Leitura</button><button onclick="nav(\'ai\')" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.875rem;border-radius:0.75rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);font-size:0.875rem;font-weight:500;color:white;cursor:pointer"><iconify-icon icon="lucide:bot" width="16" style="color:#E6B800"></iconify-icon>Perguntar à IA</button></div>';
+    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem"><button onclick="openAddReading()" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.875rem;border-radius:0.75rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);font-size:0.875rem;font-weight:500;color:white;cursor:pointer;font-family:inherit"><iconify-icon icon="lucide:thermometer" width="16" style="color:#E6B800"></iconify-icon>Registrar Leitura</button><button onclick="nav(\'ai\')" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.875rem;border-radius:0.75rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);font-size:0.875rem;font-weight:500;color:white;cursor:pointer;font-family:inherit"><iconify-icon icon="lucide:bot" width="16" style="color:#E6B800"></iconify-icon>Perguntar à IA</button></div>';
     var tip = TIPS[Math.floor(Math.random()*TIPS.length)];
     h += '<div style="display:flex;gap:0.75rem;padding:0.875rem;border-radius:0.75rem;background:rgba(230,184,0,0.05);border:1px solid rgba(230,184,0,0.1)"><iconify-icon icon="lucide:lightbulb" width="16" style="color:#E6B800;flex-shrink:0;margin-top:2px"></iconify-icon><p style="font-size:0.75rem;color:#a3a3a3;line-height:1.5">'+tip+'</p></div>';
     if (S.lots.length > 1) {
@@ -235,31 +229,58 @@ function rHome() {
   pg.innerHTML = h;
 }
 
-/* ===== CRIAR LOTE ===== */
 function openCreateLot() {
   var h = '<div style="background:#111;border-radius:1.5rem 1.5rem 0 0;padding:1.5rem;border-top:1px solid rgba(255,255,255,0.1);display:flex;flex-direction:column;gap:1.25rem">';
   h += '<div style="display:flex;justify-content:space-between;align-items:center"><h3 style="font-size:1rem;font-weight:700">Novo Lote</h3><button onclick="closeModal()" style="background:none;border:none;color:#737373;cursor:pointer;padding:4px"><iconify-icon icon="lucide:x" width="20"></iconify-icon></button></div>';
   h += '<div><label style="font-size:0.75rem;font-weight:600;color:#a3a3a3;display:block;margin-bottom:6px">Nome do Lote</label><input id="lotName" type="text" placeholder="Ex: Lote 01 - Galinha" style="width:100%;padding:0.75rem 1rem;border-radius:0.75rem;background:#050505;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;color:white;font-family:inherit"></div>';
-  h += '<div><label style="font-size:0.75rem;font-weight:600;color:#a3a3a3;display:block;margin-bottom:6px">Espécie</label><select id="lotSpecies" style="width:100%;padding:0.75rem 1rem;border-radius:0.75rem;background:#050505;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;color:white;font-family:inherit;appearance:none">';
-  for (var i=0; i<SPECIES.length; i++) h += '<option value="'+SPECIES[i].name+'">'+SPECIES[i].emoji+' '+SPECIES[i].name+' ('+SPECIES[i].days+' dias)</option>';
+  h += '<div><label style="font-size:0.75rem;font-weight:600;color:#a3a3a3;display:block;margin-bottom:6px">Espécie</label><select id="lotSpecies" onchange="toggleOutra()" style="width:100%;padding:0.75rem 1rem;border-radius:0.75rem;background:#050505;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;color:white;font-family:inherit;appearance:none">';
+  for (var i=0; i<SPECIES.length; i++) {
+    if (SPECIES[i].name === 'Outra') {
+      h += '<option value="__outra__">'+SPECIES[i].emoji+' '+SPECIES[i].name+'</option>';
+    } else {
+      h += '<option value="'+SPECIES[i].name+'">'+SPECIES[i].emoji+' '+SPECIES[i].name+' ('+SPECIES[i].days+' dias)</option>';
+    }
+  }
   h += '</select></div>';
+  h += '<div id="outraFields" style="display:none;flex-direction:column;gap:0.75rem">';
+  h += '<div><label style="font-size:0.75rem;font-weight:600;color:#a3a3a3;display:block;margin-bottom:6px">Nome da Espécie</label><input id="outraNome" type="text" placeholder="Ex: Calopsita" style="width:100%;padding:0.75rem 1rem;border-radius:0.75rem;background:#050505;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;color:white;font-family:inherit"></div>';
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem"><div><label style="font-size:0.75rem;font-weight:600;color:#a3a3a3;display:block;margin-bottom:6px">Dias de Incubação</label><input id="outraDias" type="number" min="1" max="120" placeholder="21" style="width:100%;padding:0.75rem 1rem;border-radius:0.75rem;background:#050505;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;color:white;font-family:inherit"></div><div><label style="font-size:0.75rem;font-weight:600;color:#a3a3a3;display:block;margin-bottom:6px">Temperatura (°C)</label><input id="outraTemp" type="text" placeholder="37.5" style="width:100%;padding:0.75rem 1rem;border-radius:0.75rem;background:#050505;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;color:white;font-family:inherit"></div></div></div>';
   h += '<div><label style="font-size:0.75rem;font-weight:600;color:#a3a3a3;display:block;margin-bottom:6px">Quantidade de Ovos</label><input id="lotEggs" type="number" min="1" max="999" placeholder="Ex: 24" style="width:100%;padding:0.75rem 1rem;border-radius:0.75rem;background:#050505;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;color:white;font-family:inherit"></div>';
   h += '<div><label style="font-size:0.75rem;font-weight:600;color:#a3a3a3;display:block;margin-bottom:6px">Data de Início</label><input id="lotDate" type="date" value="'+new Date().toISOString().split('T')[0]+'" style="width:100%;padding:0.75rem 1rem;border-radius:0.75rem;background:#050505;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;color:white;font-family:inherit;color-scheme:dark"></div>';
   h += '<label style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;border-radius:0.75rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);cursor:pointer"><input type="checkbox" id="lotAutoTurn" checked style="width:1rem;height:1rem;border-radius:4px;accent-color:#E6B800"><span style="font-size:0.75rem;color:#d4d4d4">Lembretes automáticos de viragem (3x/dia)</span></label>';
-  h += '<button onclick="createLot()" style="width:100%;padding:0.875rem;border-radius:0.75rem;background:linear-gradient(135deg,#F2C94C,#E6B800);color:#050505;font-size:0.875rem;font-weight:700;border:none;cursor:pointer">Criar Lote</button>';
+  h += '<button onclick="createLot()" style="width:100%;padding:0.875rem;border-radius:0.75rem;background:linear-gradient(135deg,#F2C94C,#E6B800);color:#050505;font-size:0.875rem;font-weight:700;border:none;cursor:pointer;font-family:inherit">Criar Lote</button>';
   h += '</div>';
   openModal(h);
 }
 
+function toggleOutra() {
+  var sel = document.getElementById('lotSpecies');
+  var f = document.getElementById('outraFields');
+  f.style.display = sel.value === '__outra__' ? 'flex' : 'none';
+}
+
 function createLot() {
-  var name = document.getElementById('lotName').value.trim();
   var species = document.getElementById('lotSpecies').value;
+  var name = document.getElementById('lotName').value.trim();
   var eggs = parseInt(document.getElementById('lotEggs').value);
   var date = document.getElementById('lotDate').value;
   var auto = document.getElementById('lotAutoTurn').checked;
+
+  if (species === '__outra__') {
+    var onome = document.getElementById('outraNome').value.trim();
+    var odias = parseInt(document.getElementById('outraDias').value);
+    var otemp = document.getElementById('outraTemp').value.trim();
+    if (!onome) { toast('Digite o nome da espécie'); return; }
+    if (!odias || odias < 1) { toast('Digite os dias de incubação'); return; }
+    if (!otemp) { toast('Digite a temperatura'); return; }
+    SPECIES.push({name:onome, days:odias, temp:otemp, humid:'55-60', humidLock:'65-70', turns:'3x/dia', emoji:'🥚'});
+    species = onome;
+  }
+
   if (!name) { toast('Digite um nome para o lote'); return; }
   if (!eggs || eggs<1) { toast('Digite a quantidade de ovos'); return; }
   if (!date) { toast('Selecione a data de início'); return; }
+
   var lot = {id:gid(), name:name, species:species, eggs:eggs, startDate:date, autoTurn:auto, createdAt:new Date().toISOString()};
   S.lots.push(lot); S.activeLotId = lot.id; schedAlarms(lot); save();
   closeModal(); toast('Lote criado com sucesso!');
@@ -269,10 +290,9 @@ function createLot() {
 
 function switchLot(id) { S.activeLotId = id; save(); nav('home'); }
 
-/* ===== LOTES ===== */
 function rLots() {
   var pg = document.getElementById('page-lots'), h = '';
-  h += '<div style="display:flex;justify-content:space-between;align-items:center"><h2 style="font-size:1.125rem;font-weight:700">Meus Lotes</h2><button onclick="openCreateLot()" style="display:flex;align-items:center;gap:6px;padding:0.5rem 0.875rem;border-radius:0.75rem;background:linear-gradient(135deg,#F2C94C,#E6B800);color:#050505;font-size:0.75rem;font-weight:700;border:none;cursor:pointer"><iconify-icon icon="lucide:plus" width="14"></iconify-icon>Novo</button></div>';
+  h += '<div style="display:flex;justify-content:space-between;align-items:center"><h2 style="font-size:1.125rem;font-weight:700">Meus Lotes</h2><button onclick="openCreateLot()" style="display:flex;align-items:center;gap:6px;padding:0.5rem 0.875rem;border-radius:0.75rem;background:linear-gradient(135deg,#F2C94C,#E6B800);color:#050505;font-size:0.75rem;font-weight:700;border:none;cursor:pointer;font-family:inherit"><iconify-icon icon="lucide:plus" width="14"></iconify-icon>Novo</button></div>';
   if (!S.lots.length) {
     h += '<div style="text-align:center;padding:4rem 0"><iconify-icon icon="lucide:layers" width="40" style="color:#262626;display:block;margin-bottom:0.75rem"></iconify-icon><p style="font-size:0.875rem;color:#525252">Nenhum lote criado ainda</p></div>';
   }
@@ -300,7 +320,6 @@ function delLot(id, name) {
   });
 }
 
-/* ===== REGISTRAR LEITURA ===== */
 function openAddReading() {
   var act = active(); if (!act) { toast('Nenhum lote ativo'); return; }
   var h = '<div style="background:#111;border-radius:1.5rem 1.5rem 0 0;padding:1.5rem;border-top:1px solid rgba(255,255,255,0.1);display:flex;flex-direction:column;gap:1.25rem">';
@@ -308,7 +327,7 @@ function openAddReading() {
   h += '<p style="font-size:0.75rem;color:#737373">'+esc(act.name)+' — '+act.species+'</p>';
   h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem"><div><label style="font-size:0.75rem;font-weight:600;color:#a3a3a3;display:block;margin-bottom:6px">Temperatura (°C)</label><input id="rdTemp" type="number" step="0.1" placeholder="37.5" style="width:100%;padding:0.75rem 1rem;border-radius:0.75rem;background:#050505;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;color:white;font-family:inherit"></div><div><label style="font-size:0.75rem;font-weight:600;color:#a3a3a3;display:block;margin-bottom:6px">Umidade (%)</label><input id="rdHumid" type="number" step="1" placeholder="60" style="width:100%;padding:0.75rem 1rem;border-radius:0.75rem;background:#050505;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;color:white;font-family:inherit"></div></div>';
   h += '<div><label style="font-size:0.75rem;font-weight:600;color:#a3a3a3;display:block;margin-bottom:6px">Observações (opcional)</label><textarea id="rdNote" rows="2" placeholder="Ex: Temperatura estável..." style="width:100%;padding:0.75rem 1rem;border-radius:0.75rem;background:#050505;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;color:white;font-family:inherit;resize:none"></textarea></div>';
-  h += '<button onclick="saveReading()" style="width:100%;padding:0.875rem;border-radius:0.75rem;background:linear-gradient(135deg,#F2C94C,#E6B800);color:#050505;font-size:0.875rem;font-weight:700;border:none;cursor:pointer">Salvar Leitura</button>';
+  h += '<button onclick="saveReading()" style="width:100%;padding:0.875rem;border-radius:0.75rem;background:linear-gradient(135deg,#F2C94C,#E6B800);color:#050505;font-size:0.875rem;font-weight:700;border:none;cursor:pointer;font-family:inherit">Salvar Leitura</button>';
   h += '</div>';
   openModal(h);
 }
@@ -326,7 +345,6 @@ function saveReading() {
   nav('home');
 }
 
-/* ===== CALENDÁRIO ===== */
 function rCal() {
   var pg = document.getElementById('page-calendar'), act = active(), h = '';
   h += '<h2 style="font-size:1.125rem;font-weight:700">Calendário</h2>';
@@ -387,12 +405,12 @@ function chCal(dir) {
   save(); rCal();
 }
 
-/* ===== TABELA ===== */
 function rTable() {
   var pg = document.getElementById('page-table'), h = '';
   h += '<h2 style="font-size:1.125rem;font-weight:700">Tabela de Referência</h2><p style="font-size:0.75rem;color:#737373">Parâmetros ideais por espécie</p>';
   h += '<div style="display:flex;flex-direction:column;gap:0.5rem">';
   for (var i=0;i<SPECIES.length;i++) {
+    if (SPECIES[i].name === 'Outra') continue;
     var s = SPECIES[i];
     h += '<div style="padding:1rem;border-radius:1rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);display:flex;flex-direction:column;gap:0.75rem"><div style="display:flex;align-items:center;gap:0.75rem"><div style="width:2.75rem;height:2.75rem;border-radius:0.5rem;background:rgba(230,184,0,0.1);display:flex;align-items:center;justify-content:center;font-size:1.25rem">'+s.emoji+'</div><div><p style="font-size:0.875rem;font-weight:700">'+s.name+'</p><p style="font-size:0.625rem;color:#525252">Período: '+s.days+' dias</p></div></div>';
     h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem"><div style="padding:0.625rem;border-radius:0.5rem;background:rgba(5,5,5,0.6)"><p style="font-size:0.625rem;color:#525252;margin-bottom:2px">Temperatura</p><p style="font-size:0.75rem;font-weight:700;color:#fdba74">'+s.temp+'°C</p></div><div style="padding:0.625rem;border-radius:0.5rem;background:rgba(5,5,5,0.6)"><p style="font-size:0.625rem;color:#525252;margin-bottom:2px">Umidade</p><p style="font-size:0.75rem;font-weight:700;color:#93c5fd">'+s.humid+'%</p></div><div style="padding:0.625rem;border-radius:0.5rem;background:rgba(5,5,5,0.6)"><p style="font-size:0.625rem;color:#525252;margin-bottom:2px">Umidade Lock</p><p style="font-size:0.75rem;font-weight:700;color:#fcd34d">'+s.humidLock+'%</p></div><div style="padding:0.625rem;border-radius:0.5rem;background:rgba(5,5,5,0.6)"><p style="font-size:0.625rem;color:#525252;margin-bottom:2px">Viragens</p><p style="font-size:0.75rem;font-weight:700;color:#c4b5fd">'+s.turns+'</p></div></div>';
@@ -404,7 +422,6 @@ function rTable() {
   pg.innerHTML = h;
 }
 
-/* ===== IA ===== */
 var aiBusy = false;
 
 function rAI() {
@@ -413,7 +430,7 @@ function rAI() {
     h += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:1.5rem"><div class="float-anim" style="width:5rem;height:5rem;border-radius:50%;background:linear-gradient(135deg,#F2C94C,#E6B800);display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;box-shadow:0 0 40px -5px rgba(242,201,76,0.4)"><iconify-icon icon="lucide:bot" width="32" style="color:#050505"></iconify-icon></div><h3 style="font-size:1.125rem;font-weight:700;margin-bottom:0.5rem">Assistente de Incubação</h3><p style="font-size:0.75rem;color:#737373;text-align:center;line-height:1.6;max-width:20rem;margin-bottom:2rem">Para usar o chat com IA, precisamos da sua chave da Groq. É gratuita e leva 1 minuto para criar.</p>';
     h += '<div style="width:100%;display:flex;flex-direction:column;gap:1rem"><div><label style="font-size:0.75rem;font-weight:600;color:#a3a3a3;display:block;margin-bottom:6px">Sua Chave API Groq</label><input id="groqKeyInput" type="password" placeholder="gsk_" style="width:100%;padding:0.875rem 1rem;border-radius:0.75rem;background:#111;border:1px solid rgba(255,255,255,0.1);font-size:0.875rem;color:white;font-family:monospace"></div>';
     h += '<a href="https://console.groq.com/keys" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;width:100%;padding:0.75rem;border-radius:0.75rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);font-size:0.75rem;font-weight:500;color:#d4d4d4;text-decoration:none"><iconify-icon icon="lucide:external-link" width="14" style="color:#E6B800"></iconify-icon>Criar chave gratuita no site da Groq</a>';
-    h += '<button onclick="saveGroqKey()" style="width:100%;padding:0.875rem;border-radius:0.75rem;background:linear-gradient(135deg,#F2C94C,#E6B800);color:#050505;font-size:0.875rem;font-weight:700;border:none;cursor:pointer">Salvar e Começar</button>';
+    h += '<button onclick="saveGroqKey()" style="width:100%;padding:0.875rem;border-radius:0.75rem;background:linear-gradient(135deg,#F2C94C,#E6B800);color:#050505;font-size:0.875rem;font-weight:700;border:none;cursor:pointer;font-family:inherit">Salvar e Começar</button>';
     h += '<p style="font-size:0.625rem;color:#404040;text-align:center">Sua chave fica salva apenas no seu dispositivo.</p></div></div>';
     pg.innerHTML = h; return;
   }
@@ -477,7 +494,6 @@ function renderChat() {
   cc.innerHTML = h; cc.scrollTop = cc.scrollHeight;
 }
 
-/* ===== CONFIGURAÇÕES ===== */
 function rSettings() {
   var pg = document.getElementById('page-settings'), h = '';
   h += '<h2 style="font-size:1.125rem;font-weight:700">Configurações</h2>';
@@ -511,7 +527,6 @@ function clearAll() {
   }, 'Limpar');
 }
 
-/* ===== INIT ===== */
 if ('serviceWorker' in navigator) {
   var base = location.pathname.replace(/[^/]*$/, '');
   navigator.serviceWorker.register(base + 'sw.js', {scope: base}).catch(function(){});
