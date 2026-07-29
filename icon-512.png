@@ -1,0 +1,8 @@
+<canvas id="c" width="512" height="512"></canvas>
+<script>
+var c=document.getElementById('c').getContext('2d');
+c.fillStyle='#050505';c.fillRect(0,0,512,512);
+var g=c.createLinearGradient(160,80,352,432);g.addColorStop(0,'#F2C94C');g.addColorStop(1,'#E6B800');
+c.beginPath();c.ellipse(256,252,96,140,0,0,Math.PI*2);c.fillStyle=g;c.fill();
+c.beginPath();c.ellipse(256,280,58,80,0,0,Math.PI*2);c.fillStyle='rgba(5,5,5,0.25)';c.fill();
+</script>
