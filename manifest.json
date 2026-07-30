@@ -1,7 +1,7 @@
 {
-  "name": "IncubaPro - Controle de Incubação",
+  "name": "IncubaPro",
   "short_name": "IncubaPro",
-  "description": "Assistente completo e inteligente para incubação de ovos",
+  "description": "Assistente completo para incubação de ovos",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#050505",
@@ -9,7 +9,7 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23050505'/><text x='50' y='68' font-size='50' text-anchor='middle' fill='%23E6B800'>🥚</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23050505'/><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='%23F2C94C'/><stop offset='100%25' stop-color='%23E6B800'/></linearGradient></defs><path d='M50 20c-12 0-22 10-22 22 0 8 4 15 10 19v6c0 2 2 4 4 4h16c2 0 4-2 4-4v-6c6-4 10-11 10-19 0-12-10-22-22-22z' fill='url(%23g)'/><rect x='42' y='75' width='16' height='4' rx='2' fill='%23F2C94C' opacity='0.5'/></svg>",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
