@@ -9,9 +9,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="IncubaPro">
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<script src="https://tailwindcss.com"></script>
+<script src="https://iconify.design"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script>
 tailwind.config={theme:{extend:{fontFamily:{sans:['Manrope','sans-serif']},colors:{gold:{100:'#FDEEbb',300:'#F2C94C',400:'#FFD369',500:'#E6B800',600:'#B38F00'},charcoal:{800:'#1A1A1A',900:'#111111',950:'#050505'}},backgroundImage:{'gold-gradient':'linear-gradient(135deg,#F2C94C 0%,#E6B800 100%)'}}}}
 </script>
@@ -30,14 +31,11 @@ body{overscroll-behavior:none}
 input:focus,textarea:focus,select:focus{outline:none}
 ::-webkit-scrollbar{width:0;height:0}
 .slu{animation:slu .35s cubic-bezier(.16,1,.3,1)}@keyframes slu{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes fo{to{opacity:0;transform:translateY(-10px)}}
 .mbg{animation:mbg .2s ease}@keyframes mbg{from{opacity:0}to{opacity:1}}
 .mbox{animation:mbox .3s cubic-bezier(.16,1,.3,1)}@keyframes mbox{from{opacity:0;transform:scale(.95) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
 .lot-card{transition:all .2s ease}.lot-card:active{transform:scale(.98)}
-.temp-cold{color:#60A5FA}.temp-ok{color:#4ADE80}.temp-warm{color:#FBBF24}.temp-hot{color:#F87171}
-.progress-ring-circle{transition:stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1);transform:rotate(-90deg);transform-origin:50% 50%}
-input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}input[type=number]{-moz-appearance:textfield}
-.chat-scroll{scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
-.card-glow{box-shadow:0 0 15px -3px rgba(242,201,76,0.15);border-color:rgba(242,201,76,0.3)}
+input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
 </style>
 </head>
 <body class="bg-charcoal-950 text-white font-sans antialiased">
@@ -61,34 +59,26 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <div id="page-table" class="scr px-5 pt-3 pb-6 space-y-4"></div>
 <div id="page-estufa" class="scr px-5 pt-3 pb-6 space-y-5"></div>
 <div id="page-settings" class="scr px-5 pt-3 pb-6 space-y-5"></div>
-<div id="page-more" class="scr px-5 pt-3 pb-6 space-y-4"></div>
 </main>
 
-<div id="notifPanel" class="fixed inset-0 z-50 hidden" onclick="closeNotif()"><div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div><div class="absolute top-0 right-0 w-full max-w-sm h-full bg-charcoal-950 border-l border-white/10 slu overflow-y-auto" onclick="event.stopPropagation()"><div class="flex items-center justify-between p-5 border-b border-white/5"><h3 class="text-sm font-bold">Notificações</h3><button onclick="closeNotif()" class="text-neutral-500 hover:text-white"><iconify-icon icon="lucide:x" width="20"></iconify-icon></button></div><div class="p-4 space-y-2" id="notifList"></div></div></div>
+<div id="notifPanel" class="fixed inset-0 z-50 hidden" onclick="closeNotif()">
+<div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+<div class="absolute top-0 right-0 w-full max-w-sm h-full bg-charcoal-950 border-l border-white/10 slu overflow-y-auto" onclick="event.stopPropagation()">
+<div class="flex items-center justify-between p-5 border-b border-white/5"><h3 class="text-sm font-bold">Notificações</h3><button onclick="closeNotif()" class="text-neutral-500 hover:text-white"><iconify-icon icon="lucide:x" width="20"></iconify-icon></button></div>
+<div class="p-4 space-y-2" id="notifList"></div>
+</div>
+</div>
 
-<div id="modalOverlay" class="fixed inset-0 z-50 hidden" onclick="closeModal()"><div class="absolute inset-0 bg-black/70 backdrop-blur-sm mbg"></div><div class="absolute bottom-0 left-0 right-0 max-w-md mx-auto mbox" id="modalContent" onclick="event.stopPropagation()"></div></div>
+<div id="modalOverlay" class="fixed inset-0 z-50 hidden" onclick="closeModal()">
+<div class="absolute inset-0 bg-black/70 backdrop-blur-sm mbg"></div>
+<div class="absolute bottom-0 left-0 right-0 max-w-md mx-auto mbox" id="modalContent" onclick="event.stopPropagation()"></div>
+</div>
 
-<div id="confirmOverlay" class="fixed inset-0 z-[60] hidden"><div class="absolute inset-0 bg-black/70 backdrop-blur-sm mbg" onclick="closeConf()"></div><div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] max-w-sm mbox"><div class="bg-charcoal-900 rounded-2xl p-6 border border-white/10 text-center" id="confirmContent"></div></div></div>
-
-<!-- Modal Inicial (Granja/Usuário) -->
-<div id="welcomeOverlay" class="fixed inset-0 z-[70] hidden flex items-center justify-center p-6">
-    <div class="absolute inset-0 bg-charcoal-950 mbg"></div>
-    <div class="relative w-full max-w-sm mbox text-center">
-        <div class="w-16 h-16 rounded-2xl bg-gold-gradient flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_-5px_rgba(242,201,76,0.5)]">
-            <iconify-icon icon="lucide:egg" width="32" class="text-charcoal-900"></iconify-icon>
-        </div>
-        <h2 class="text-2xl font-bold mb-2">Bem-vindo ao IncubaPro</h2>
-        <p class="text-neutral-500 text-sm mb-8">Configure rapidamente para começar a monitorar sua incubação.</p>
-        <div class="space-y-4 text-left">
-            <div>
-                <label class="text-xs text-neutral-500 block mb-2">Nome da Granja ou Usuário</label>
-                <input type="text" id="wName" placeholder="Ex: Granja Vale Verde" class="w-full bg-charcoal-800 border border-white/10 rounded-xl px-4 py-3.5 text-sm focus:border-gold-500/50 transition-colors text-white placeholder:text-neutral-600">
-            </div>
-            <button onclick="saveWelcome()" class="w-full py-3.5 rounded-xl bg-gold-gradient text-charcoal-900 font-bold text-sm">
-                Começar Agora
-            </button>
-        </div>
-    </div>
+<div id="confirmOverlay" class="fixed inset-0 z-[60] hidden">
+<div class="absolute inset-0 bg-black/70 backdrop-blur-sm mbg" onclick="closeConf()"></div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] max-w-sm mbox">
+<div class="bg-charcoal-900 rounded-2xl p-6 border border-white/10 text-center" id="confirmContent"></div>
+</div>
 </div>
 
 <nav class="fixed bottom-0 left-0 right-0 z-40 bg-charcoal-950/95 backdrop-blur-md border-t border-white/5">
@@ -96,121 +86,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <button onclick="nav('home')" class="tb on flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-colors" data-t="home"><iconify-icon icon="lucide:home" width="20"></iconify-icon><span class="text-[10px] font-medium">Início</span><div class="dot w-1 h-1 rounded-full bg-gold-400 opacity-0 transition-opacity"></div></button>
 <button onclick="nav('calendar')" class="tb flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl text-neutral-500 transition-colors" data-t="calendar"><iconify-icon icon="lucide:calendar" width="20"></iconify-icon><span class="text-[10px] font-medium">Calendário</span><div class="dot w-1 h-1 rounded-full bg-gold-400 opacity-0 transition-opacity"></div></button>
 <button onclick="nav('ai')" class="tb flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl text-neutral-500 transition-colors relative" data-t="ai"><div class="w-10 h-10 -mt-5 rounded-full bg-gold-gradient flex items-center justify-center shadow-[0_0_20px_-3px_rgba(242,201,76,0.5)]"><iconify-icon icon="lucide:bot" width="20" class="text-charcoal-900"></iconify-icon></div><span class="text-[10px] font-medium -mt-0.5">IA</span><div class="dot w-1 h-1 rounded-full bg-gold-400 opacity-0 transition-opacity"></div></button>
-<button onclick="nav('lots')" class="tb flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl text-neutral-500 transition-colors" data-t="lots"><iconify-icon icon="lucide:layers" width="20"></iconify-icon><span class="text-[10px] font-medium">Lotes</span><div class="dot w-1 h-1 rounded-full bg-gold-400 opacity-0 transition-opacity"></div></button>
-<button onclick="nav('more')" class="tb flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl text-neutral-500 transition-colors" data-t="more"><iconify-icon icon="lucide:menu" width="20"></iconify-icon><span class="text-[10px] font-medium">Mais</span><div class="dot w-1 h-1 rounded-full bg-gold-400 opacity-0 transition-opacity"></div></button>
+<button onclick="nav('table')" class="tb flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl text-neutral-500 transition-colors" data-t="table"><iconify-icon icon="lucide:book-open" width="20"></iconify-icon><span class="text-[10px] font-medium">Tabela</span><div class="dot w-1 h-1 rounded-full bg-gold-400 opacity-0 transition-opacity"></div></button>
+<button onclick="nav('estufa')" class="tb flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl text-neutral-500 transition-colors" data-t="estufa"><iconify-icon icon="lucide:thermometer" width="20"></iconify-icon><span class="text-[10px] font-medium">Estufa</span><div class="dot w-1 h-1 rounded-full bg-gold-400 opacity-0 transition-opacity"></div></button>
 </div>
 </nav>
 </div>
-
-<script>
-// --- ESTADO E DADOS ---
-const STATE_KEY = 'incubapro_state';
-const GROQ_KEY_STORAGE = 'incubapro_groq_key';
-let groqApiKey = localStorage.getItem(GROQ_KEY_STORAGE) || '';
-let state = loadState();
-
-// Base de dados expandida (10 espécies)
-const BIRDS_BASE = {
-    galinha: { name: 'Galinha', days: 21, tempMin: 37.5, tempMax: 37.8, umidMin: 55, umidMax: 65, umidFinal: 75, turnStop: 18, candling: [7, 14], isCustom: false },
-    codorna: { name: 'Codorna', days: 17, tempMin: 37.5, tempMax: 37.8, umidMin: 50, umidMax: 60, umidFinal: 70, turnStop: 14, candling: [6, 12], isCustom: false },
-    pato: { name: 'Pato', days: 28, tempMin: 37.5, tempMax: 37.8, umidMin: 55, umidMax: 65, umidFinal: 80, turnStop: 25, candling: [7, 14, 21], isCustom: false },
-    peru: { name: 'Peru', days: 28, tempMin: 37.2, tempMax: 37.5, umidMin: 55, umidMax: 65, umidFinal: 78, turnStop: 25, candling: [7, 14, 21], isCustom: false },
-    ganso: { name: 'Ganso', days: 31, tempMin: 37.2, tempMax: 37.5, umidMin: 60, umidMax: 70, umidFinal: 85, turnStop: 27, candling: [8, 15, 22], isCustom: false },
-    faisao: { name: 'Faisão', days: 24, tempMin: 37.5, tempMax: 37.8, umidMin: 55, umidMax: 65, umidFinal: 75, turnStop: 21, candling: [7, 14], isCustom: false },
-    marreco: { name: 'Marreco', days: 35, tempMin: 37.2, tempMax: 37.5, umidMin: 60, umidMax: 70, umidFinal: 85, turnStop: 31, candling: [10, 20], isCustom: false },
-    avestruz: { name: 'Avestruz', days: 42, tempMin: 36.0, tempMax: 36.5, umidMin: 20, umidMax: 30, umidFinal: 40, turnStop: 39, candling: [14, 28], isCustom: false },
-    ema: { name: 'Ema', days: 36, tempMin: 36.5, tempMax: 37.0, umidMin: 25, umidMax: 35, umidFinal: 45, turnStop: 34, candling: [12, 24], isCustom: false },
-    pavao: { name: 'Pavão', days: 28, tempMin: 37.2, tempMax: 37.5, umidMin: 55, umidMax: 65, umidFinal: 80, turnStop: 25, candling: [7, 14, 21], isCustom: false }
-};
-
-// Função para mesclar aves base com aves customizadas do estado
-function getBirds() {
-    let customBirds = {};
-    if (state.customBirds) {
-        state.customBirds.forEach(b => { customBirds[b.id] = { ...b, isCustom: true }; });
-    }
-    return { ...BIRDS_BASE, ...customBirds };
-}
-
-function getDefaultState() {
-    return {
-        userName: '',
-        lots: [
-            { id: 1, type: 'galinha', eggs: 24, startDate: getDateDaysAgo(5), status: 'incubando' },
-            { id: 2, type: 'codorna', eggs: 50, startDate: getDateDaysAgo(15), status: 'incubando' }
-        ],
-        estufa: { temp: 37.5, umid: 60 },
-        notifications: [
-            { id: 1, text: 'Hora de virar os ovos do Lote 1 (Galinha)!', time: 'Agora', read: false, icon: 'lucide:rotate-cw' },
-            { id: 2, text: 'Ovos de Codorna devem eclodir amanhã!', time: '1h atrás', read: false, icon: 'lucide:alert-triangle' }
-        ],
-        settings: { notifyTurn: true, notifyTemp: true },
-        customBirds: []
-    };
-}
-
-function loadState() { try { const s = localStorage.getItem(STATE_KEY); return s ? JSON.parse(s) : getDefaultState(); } catch (e) { return getDefaultState(); } }
-function saveState() { localStorage.setItem(STATE_KEY, JSON.stringify(state)); }
-function getDateDaysAgo(days) { const d = new Date(); d.setDate(d.getDate() - days); d.setHours(10, 0, 0, 0); return d.toISOString().split('T')[0]; }
-function getDaysDiff(dateStr) { const s = new Date(dateStr + "T00:00:00"); const n = new Date(); n.setHours(0,0,0,0); return Math.floor((n - s) / (1000 * 60 * 60 * 24)); }
-
-// --- NAVEGAÇÃO ---
-const titles = { home: 'IncubaPro', lots: 'Meus Lotes', calendar: 'Calendário', ai: 'Assistente IA', table: 'Tabela Referência', estufa: 'Dados da Estufa', settings: 'Configurações', more: 'Mais Opções' };
-
-function nav(page) {
-    document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
-    document.querySelectorAll('.tb').forEach(b => { b.classList.remove('on'); b.classList.add('text-neutral-500'); });
-    const target = document.getElementById(`page-${page}`); if (target) target.classList.add('on');
-    const btn = document.querySelector(`.tb[data-t="${page}"]`); if (btn) { btn.classList.add('on'); btn.classList.remove('text-neutral-500'); }
-    document.getElementById('hTitle').innerText = titles[page] || 'IncubaPro';
-    document.getElementById('mainArea').scrollTop = 0;
-    renderPage(page);
-}
-
-function renderPage(page) {
-    switch(page) {
-        case 'home': renderHome(); break; case 'lots': renderLots(); break; case 'calendar': renderCalendar(); break;
-        case 'ai': renderAI(); break; case 'table': renderTable(); break; case 'estufa': renderEstufa(); break;
-        case 'settings': renderSettings(); break; case 'more': renderMore(); break;
-    }
-    updateBadge();
-}
-
-// --- TELAS ---
-function renderHome() {
-    const el = document.getElementById('page-home');
-    const activeLots = state.lots.filter(l => l.status === 'incubando');
-    const totalEggs = activeLots.reduce((sum, l) => sum + l.eggs, 0);
-    const needsTurning = activeLots.filter(l => getDaysDiff(l.startDate) < getBirds()[l.type].turnStop).length;
-    const name = state.userName || 'Criador';
-
-    el.innerHTML = `
-        <div class="flex items-center justify-between">
-            <div><p class="text-neutral-500 text-xs font-medium uppercase tracking-wider">Visão Geral</p><h2 class="text-2xl font-bold mt-1">Olá, ${name}!</h2></div>
-            <div class="w-12 h-12 rounded-full bg-charcoal-900 border border-white/10 flex items-center justify-center text-gold-400"><iconify-icon icon="lucide:user" width="24"></iconify-icon></div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-            <div class="bg-charcoal-900 border border-white/5 rounded-2xl p-4"><div class="w-8 h-8 rounded-lg bg-gold-500/10 flex items-center justify-center mb-3"><iconify-icon icon="lucide:egg" width="16" class="text-gold-400"></iconify-icon></div><p class="text-2xl font-bold">${totalEggs}</p><p class="text-xs text-neutral-500 mt-0.5">Ovos Incubando</p></div>
-            <div class="bg-charcoal-900 border border-white/5 rounded-2xl p-4"><div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center mb-3"><iconify-icon icon="lucide:layers" width="16" class="text-blue-400"></iconify-icon></div><p class="text-2xl font-bold">${activeLots.length}</p><p class="text-xs text-neutral-500 mt-0.5">Lotes Ativos</p></div>
-        </div>
-        <div>
-            <div class="flex items-center justify-between mb-3"><h3 class="text-sm font-semibold">Tarefas de Hoje</h3><span class="text-xs text-gold-400 font-medium">${needsTurning > 0 ? 'Pendente' : 'Nenhuma'}</span></div>
-            ${needsTurning > 0 ? `<div class="bg-charcoal-900 border border-gold-500/20 card-glow rounded-2xl p-4 flex items-center gap-4 lot-card cursor-pointer" onclick="nav('lots')"><div class="w-10 h-10 rounded-full bg-gold-500/10 flex items-center justify-center shrink-0 pd"><iconify-icon icon="lucide:rotate-cw" width="18" class="text-gold-400"></iconify-icon></div><div class="flex-1"><p class="text-sm font-semibold">Virar Ovos</p><p class="text-xs text-neutral-500 mt-0.5">${needsTurning} lote(s) precisam de viragem</p></div><iconify-icon icon="lucide:chevron-right" width="16" class="text-neutral-600"></iconify-icon></div>` : `<div class="bg-charcoal-900/50 border border-white/5 rounded-2xl p-4 text-center text-neutral-600 text-sm">Nenhuma tarefa pendente.</div>`}
-        </div>
-        <div><h3 class="text-sm font-semibold mb-3">Alertas do Sistema</h3>${renderTempAlertCard()}</div>
-        <div><h3 class="text-sm font-semibold mb-3">Próximas Eclosões</h3><div class="space-y-2">${activeLots.map(l => { const b = getBirds()[l.type]; const day = getDaysDiff(l.startDate); const daysLeft = b.days - day; const progress = (day / b.days) * 100; return `<div class="bg-charcoal-900 border border-white/5 rounded-xl p-3 flex items-center gap-3 lot-card" onclick="openLotDetails(${l.id})"><div class="w-10 h-10 rounded-lg bg-charcoal-800 flex items-center justify-center text-lg">🥚</div><div class="flex-1 min-w-0"><div class="flex items-center justify-between mb-1"><p class="text-sm font-medium truncate">Lote #${l.id} - ${b.name}</p><span class="text-xs text-gold-400 font-bold">${daysLeft}d</span></div><div class="w-full h-1.5 bg-charcoal-800 rounded-full overflow-hidden"><div class="h-full bg-gold-gradient rounded-full transition-all duration-500" style="width: ${Math.min(progress, 100)}%"></div></div></div></div>`; }).join('')}${activeLots.length === 0 ? '<p class="text-neutral-600 text-sm text-center py-4">Nenhum lote ativo.</p>' : ''}</div></div>`;
-}
-
-function renderTempAlertCard() {
-    const { temp, umid } = state.estufa; const activeLots = state.lots.filter(l => l.status === 'incubando');
-    if (activeLots.length === 0) return '<div class="bg-charcoal-900/50 border border-white/5 rounded-2xl p-4 text-center text-neutral-600 text-sm">Adicione um lote para monitorar.</div>';
-    const b = getBirds()[activeLots[0].type]; let tempClass = 'temp-ok', tempText = 'Normal', umidClass = 'temp-ok', umidText = 'Normal';
-    if (temp < b.tempMin) { tempClass = 'temp-cold'; tempText = 'Baixa'; } else if (temp > b.tempMax) { tempClass = 'temp-hot'; tempText = 'Alta'; }
-    if (umid < b.umidMin) { umidClass = 'temp-cold'; umidText = 'Baixa'; } else if (umid > b.umidMax) { umidClass = 'temp-hot'; umidText = 'Alta'; }
-    const isAlert = tempText !== 'Normal' || umidText !== 'Normal';
-    return `<div class="bg-charcoal-900 border ${isAlert ? 'border-red-500/30' : 'border-white/5'} rounded-2xl p-4 space-y-3"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><iconify-icon icon="lucide:thermometer" width="16" class="${tempClass}"></iconify-icon><span class="text-sm font-medium">Temperatura</span></div><span class="text-sm font-bold ${tempClass}">${temp.toFixed(1)}°C <span class="text-xs font-normal text-neutral-500">(${tempText})</span></span></div><div class="h-px bg-white/5"></div><div class="flex items-center justify-between"><div class="flex items-center gap-2"><iconify-icon icon="lucide:droplets" width="16" class="${umidClass}"></iconify-icon><span class="text-sm font-medium">Umidade</span></div><span class="text-sm font-bold ${umidClass}">${umid}% <span class="text-xs font-normal text-neutral-500">(${umidText})</span></span></div></div>`;
-}
-
-function renderLots() {
-    const el = document.getElementById('page-lots');
-    el.innerHTML = `<button onclick
+<script src="app.js"></script>
+</body>
+</html>
