@@ -1,34 +1,14 @@
-/* IncubaPro Custom Styles */
-
-/* Variáveis de Status de Temperatura */
-.temp-cold { color: #60A5FA; } /* Azul */
-.temp-ok { color: #4ADE80; }   /* Verde */
-.temp-warm { color: #FBBF24; } /* Amarelo */
-.temp-hot { color: #F87171; }  /* Vermelho */
-
-/* Estilo do Gráfico de Progresso Circular */
-.progress-ring-circle {
-  transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  transform: rotate(-90deg);
-  transform-origin: 50% 50%;
+/* Estilos adicionais para o IncubaPro */
+.swal2-popup {
+    background: #111111 !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 1rem !important;
+    color: #fff !important;
 }
+.swal2-title { color: #fff !important; font-family: 'Manrope', sans-serif !important; }
+.swal2-html-container { color: #a3a3a3 !important; font-family: 'Manrope', sans-serif !important; }
+.swal2-confirm { background: linear-gradient(135deg, #F2C94C 0%, #E6B800 100%) !important; color: #050505 !important; font-weight: 700 !important; border-radius: 0.75rem !important; }
+.swal2-cancel { background: #1A1A1A !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 0.75rem !important; }
 
-/* Esconder setas dos inputs number */
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-input[type=number] { -moz-appearance: textfield; }
-
-/* Ajuste de scroll suave para o chat */
-.chat-scroll {
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Efeito de brilho dourado nos cards ativos */
-.card-glow {
-  box-shadow: 0 0 15px -3px rgba(242, 201, 76, 0.15);
-  border-color: rgba(242, 201, 76, 0.3);
-}
+/* Estilo para a textarea do chat */
+#aiInput::placeholder { color: #525252; }
