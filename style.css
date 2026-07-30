@@ -1,14 +1,28 @@
-/* Estilos adicionais para o IncubaPro */
-.swal2-popup {
-    background: #111111 !important;
-    border: 1px solid rgba(255,255,255,0.1) !important;
-    border-radius: 1rem !important;
-    color: #fff !important;
-}
-.swal2-title { color: #fff !important; font-family: 'Manrope', sans-serif !important; }
-.swal2-html-container { color: #a3a3a3 !important; font-family: 'Manrope', sans-serif !important; }
-.swal2-confirm { background: linear-gradient(135deg, #F2C94C 0%, #E6B800 100%) !important; color: #050505 !important; font-weight: 700 !important; border-radius: 0.75rem !important; }
-.swal2-cancel { background: #1A1A1A !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 0.75rem !important; }
+/* Estilos Base e Animações do IncubaPro */
+::selection{background:rgba(242,201,76,.2);color:#FFD369}
+*{-webkit-tap-highlight-color:transparent}
+body{overscroll-behavior:none}
+.scr{display:none}.scr.on{display:flex;flex-direction:column;animation:fi .25s ease}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+@keyframes pr{0%{transform:scale(1);opacity:.4}100%{transform:scale(1.8);opacity:0}}
+.pd{position:relative}.pd::before{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid #E6B800;animation:pr 2s ease-out infinite}
+.tb.on{color:#E6B800}.tb.on .dot{opacity:1}
+.msg{animation:mi .3s ease}@keyframes mi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.tp{animation:bl 1.4s infinite both}.tp:nth-child(2){animation-delay:.2s}.tp:nth-child(3){animation-delay:.4s}
+@keyframes bl{0%,80%,100%{opacity:.2}40%{opacity:1}}
+input:focus,textarea:focus,select:focus{outline:none}
+::-webkit-scrollbar{width:0;height:0}
+.slu{animation:slu .35s cubic-bezier(.16,1,.3,1)}@keyframes slu{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes fo{to{opacity:0;transform:translateY(-10px)}}
+.mbg{animation:mbg .2s ease}@keyframes mbg{from{opacity:0}to{opacity:1}}
+.mbox{animation:mbox .3s cubic-bezier(.16,1,.3,1)}@keyframes mbox{from{opacity:0;transform:scale(.95) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.lot-card{transition:all .2s ease}.lot-card:active{transform:scale(.98)}
+input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
 
-/* Estilo para a textarea do chat */
-#aiInput::placeholder { color: #525252; }
+/* Animação de preenchimento da barra de progresso */
+.progress-fill { transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+
+/* Transição suave para os cards de etapas */
+.step-card { transition: all 0.3s ease; }
+.step-card:active { transform: scale(0.98); }
+.step-card.locked { opacity: 0.5; }
