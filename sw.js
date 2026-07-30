@@ -1,52 +1,65 @@
 const CACHE_NAME = 'incubapro-v1';
+const DYNAMIC_CACHE = 'incubapro-dynamic-v1';
+
+// Assets para pré-cachear (opcional, como estamos usando CDN, o Network-First cuidará)
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/app.js',
-  '/manifest.json',
-  'https://cdn.tailwindcss.com',
-  'https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js',
-  'https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap'
+    '/',
+    '/index.html',
+    '/style.css',
+    '/app.js',
+    '/manifest.json'
 ];
 
-// Instalação e cache de arquivos estáticos
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(ASSETS_TO_CACHE))
-      .then(() => self.skipWaiting())
-  );
+// Instalação: Cacheia os assets estáticos
+self.addEventListener('install', (event) => {
+    event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.addAll(ASSETS_TO_CACHE);
+        }).then(() => self.skipWaiting())
+    );
 });
 
-// Ativação e limpeza de caches antigos
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))
-    ).then(() => self.clients.claim())
-  );
+// Ativação: Limpa caches antigos automaticamente
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames
+                    .filter((name) => name !== CACHE_NAME && name !== DYNAMIC_CACHE)
+                    .map((name) => caches.delete(name))
+            );
+        }).then(() => self.clients.claim())
+    );
 });
 
-// Interceptação de requisições (Estratégia: Cache First, depois Network)
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(cachedResponse => {
-        if (cachedResponse) return cachedResponse;
-        return fetch(event.request).then(response => {
-          // Não cacheia requisições que não são GET ou originárias de APIs externas diferentes das permitidas
-          if (!response || response.status !== 200 || response.type !== 'basic') return response;
-          
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
-          return response;
-        }).catch(() => {
-          // Fallback offline para a página principal
-          if (event.request.mode === 'navigate') {
-            return caches.match('/index.html');
-          }
-        });
-      })
-  );
+// Fetch: Estratégia Network-First com fallback para cache
+self.addEventListener('fetch', (event) => {
+    // Ignora requisições não-GET (como POST para a API do Groq)
+    if (event.request.method !== 'GET') return;
+
+    event.respondWith(
+        fetch(event.request)
+            .then((response) => {
+                // Se a rede retornar sucesso, clona e salva no cache dinâmico
+                if (response && response.status === 200) {
+                    const responseClone = response.clone();
+                    caches.open(DYNAMIC_CACHE).then((cache) => {
+                        cache.put(event.request, responseClone);
+                    });
+                }
+                return response;
+            })
+            .catch(() => {
+                // Se a rede falhar (offline), busca no cache estático primeiro, depois no dinâmico
+                return caches.match(event.request).then((response) => {
+                    return response || caches.match(event.request);
+                }).catch(() => {
+                    // Fallback final para navegação offline (retorna o index.html cacheado)
+                    if (event.request.mode === 'navigate') {
+                        return caches.match('/index.html');
+                    }
+                    return new Response('Offline', { status: 503, statusText: 'Offline' });
+                });
+            })
+    );
 });
