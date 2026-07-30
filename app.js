@@ -10,12 +10,21 @@ const SPECIES = [
     { name: 'Calopsita', days: 18, temp: 37.3, humidity: 55 }
 ];
 
+const STEPS = [
+    { id: 1, title: 'Antes de Ligar a Chocadeira', desc: 'Configuração inicial, limpeza e teste do equipamento.' },
+    { id: 2, title: 'Preparando os Ovos', desc: 'Seleção, armazenamento correto e ponto de ovos férteis.' },
+    { id: 3, title: 'Antes de Utilizar a Chocadeira', desc: 'Estabilização de temperatura e umidade ideais.' },
+    { id: 4, title: 'Acompanhamento Dia a Dia', desc: 'Viragem de ovos, controle de umidade e temperatura.' },
+    { id: 5, title: 'Ovoscopia Crítica', desc: 'Verificação nos dias 7 e 14 para descartar ovos não viability.' },
+    { id: 6, title: 'Eclosão e Nascimento', desc: 'Preparação do pinteiro, stop da viragem e nascedouro.' }
+];
+
 let state = {
     lots: JSON.parse(localStorage.getItem('ip_lots') || '[]'),
-    estufas: JSON.parse(localStorage.getItem('ip_estufas') || '[]'),
     notifs: JSON.parse(localStorage.getItem('ip_notifs') || '[]'),
     chatHistory: JSON.parse(localStorage.getItem('ip_chat') || '[]'),
-    groqKey: localStorage.getItem('ip_groq') || ''
+    groqKey: localStorage.getItem('ip_groq') || '',
+    currentStep: parseInt(localStorage.getItem('ip_step') || '1')
 };
 
 let currentTab = 'home';
@@ -27,24 +36,14 @@ function save(key, data) {
 // ================= UTILITÁRIOS =================
 function formatDate(d) {
     if(!d) return '-';
-    const date = new Date(d + 'T00:00:00');
-    return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+    return new Date(d + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
 }
 
 function getDaysLeft(startDate, daysTotal) {
     if (!startDate) return 0;
     const start = new Date(startDate + 'T00:00:00');
     const now = new Date(); now.setHours(0,0,0,0);
-    const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
-    return daysTotal - diff;
-}
-
-function getProgress(startDate, daysTotal) {
-    if (!startDate) return 0;
-    const start = new Date(startDate + 'T00:00:00');
-    const now = new Date(); now.setHours(0,0,0,0);
-    const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
-    return Math.min(100, Math.max(0, (diff / daysTotal) * 100));
+    return daysTotal - Math.floor((now - start) / (1000 * 60 * 60 * 24));
 }
 
 function addNotif(text, type = 'info') {
@@ -76,7 +75,7 @@ function nav(tab) {
         }
     });
     
-    const titles = { home: 'IncubaPro', lots: 'Lotes de Incubação', calendar: 'Calendário', ai: 'Assistente IA', table: 'Tabela de Referência', estufa: 'Controle de Estufa', settings: 'Configurações' };
+    const titles = { home: 'IncubaPro', lots: 'Lotes de Incubação', calendar: 'Calendário', ai: 'Assistente IA', table: 'Espécies & Parâmetros', settings: 'Configurações' };
     document.getElementById('hTitle').textContent = titles[tab] || 'IncubaPro';
 
     if (tab === 'home') renderHome();
@@ -84,108 +83,84 @@ function nav(tab) {
     if (tab === 'calendar') renderCalendar();
     if (tab === 'ai') renderAI();
     if (tab === 'table') renderTable();
-    if (tab === 'estufa') renderEstufa();
     if (tab === 'settings') renderSettings();
     
     document.getElementById('mainArea').scrollTop = 0;
 }
 
-// ================= TELA INICIAL =================
+// ================= TELA INICIAL (ETAPAS) =================
 function renderHome() {
-    const activeLots = state.lots.filter(l => l.status === 'incubando');
     const el = document.getElementById('page-home');
-    
-    let cardsHtml = activeLots.length === 0 ? `
-        <div class="flex flex-col items-center justify-center py-16 text-center">
-            <div class="w-20 h-20 rounded-full bg-charcoal-800 flex items-center justify-center mb-4">
-                <iconify-icon icon="lucide:egg" width="32" class="text-neutral-600"></iconify-icon>
-            </div>
-            <h3 class="text-lg font-semibold text-neutral-400 mb-2">Nenhum lote ativo</h3>
-            <p class="text-sm text-neutral-600 mb-6">Crie seu primeiro lote para começar a monitorar.</p>
-            <button onclick="nav('lots'); setTimeout(openAddLotModal, 100)" class="bg-gold-gradient text-charcoal-900 font-bold text-sm px-6 py-3 rounded-xl hover:opacity-90 transition-opacity">
-                <iconify-icon icon="lucide:plus" width="16" class="mr-1 inline-block"></iconify-icon> Criar Lote
-            </button>
-        </div>
-    ` : activeLots.map(l => {
-        const spec = SPECIES.find(s => s.name === l.species) || { days: l.days, temp: l.temp, humidity: l.humidity };
-        const daysLeft = getDaysLeft(l.startDate, spec.days);
-        const progress = getProgress(l.startDate, spec.days);
-        const isUrgent = daysLeft <= 3 && daysLeft > 0;
-        const isHatching = daysLeft <= 0 && l.status === 'incubando';
-        
+    const completed = state.currentStep - 1;
+    const progress = Math.round((completed / STEPS.length) * 100);
+
+    let stepsHtml = STEPS.map(s => {
+        const isDone = s.id < state.currentStep;
+        const isCurrent = s.id === state.currentStep;
+        const isLocked = s.id > state.currentStep;
+
         return `
-        <div class="lot-card bg-charcoal-900 border border-white/5 rounded-2xl p-4 cursor-pointer" onclick="openLotDetails('${l.id}')">
-            <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-2">
-                    <div class="w-10 h-10 rounded-xl ${isUrgent ? 'bg-red-500/20 text-red-400' : 'bg-gold-500/10 text-gold-400'} flex items-center justify-center">
-                        <iconify-icon icon="lucide:egg" width="18"></iconify-icon>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-bold">${l.name}</h4>
-                        <p class="text-xs text-neutral-500">${l.species} • ${l.qty} ovos</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    ${isHatching ? '<span class="text-xs font-bold text-green-400 bg-green-400/10 px-2 py-1 rounded-lg">Ecloção!</span>' : 
-                      isUrgent ? `<span class="text-xs font-bold text-red-400">${daysLeft}d restantes</span>` : 
-                      `<span class="text-2xl font-bold text-gold-400">${daysLeft}</span><span class="text-xs text-neutral-500 block">dias</span>`}
-                </div>
+        <div class="step-card ${isLocked ? 'locked' : ''} bg-charcoal-900 border ${isCurrent ? 'border-gold-500/50' : 'border-white/5'} rounded-2xl p-4 flex items-center gap-4 ${!isLocked ? 'cursor-pointer' : ''}" 
+             ${!isLocked ? `onclick="handleStep(${s.id})"` : ''}>
+            
+            <div class="w-10 h-10 rounded-xl shrink-0 flex items-center justify-center ${isDone ? 'bg-green-500/20 text-green-400' : isCurrent ? 'bg-gold-500/20 text-gold-400' : 'bg-charcoal-800 text-neutral-600'}">
+                ${isDone ? '<iconify-icon icon="lucide:check-circle" width="20"></iconify-icon>' : 
+                  isLocked ? '<iconify-icon icon="lucide:lock" width="18"></iconify-icon>' : 
+                  `<span class="text-sm font-bold">${s.id}</span>`}
             </div>
-            <div class="w-full h-1.5 bg-charcoal-800 rounded-full overflow-hidden">
-                <div class="h-full rounded-full ${isHatching ? 'bg-green-400' : 'bg-gold-gradient'} transition-all duration-500" style="width: ${progress}%"></div>
+            
+            <div class="flex-1">
+                <h4 class="text-sm font-bold ${isLocked ? 'text-neutral-600' : 'text-white'}">${s.title}</h4>
+                <p class="text-[11px] text-neutral-500 mt-0.5 leading-relaxed">${s.desc}</p>
             </div>
-            <div class="flex items-center justify-between mt-2 text-[10px] text-neutral-600">
-                <span>Iniciado: ${formatDate(l.startDate)}</span>
-                <span>Previsão: ${formatDate(l.expectedDate)}</span>
-            </div>
+            
+            ${isCurrent ? '<div class="w-2 h-2 rounded-full bg-gold-400 pd"></div>' : ''}
         </div>`;
     }).join('');
 
     el.innerHTML = `
-        <div class="flex items-center justify-between">
-            <div>
-                <h2 class="text-xl font-bold">Meus Lotes</h2>
-                <p class="text-xs text-neutral-500 mt-0.5">${activeLots.length} lote(s) em andamento</p>
+        <div class="bg-charcoal-900 border border-white/5 rounded-2xl p-5">
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="text-sm font-bold text-neutral-300">Sua Incubação</h2>
+                <span class="text-xs font-bold text-gold-400">${completed} de ${STEPS.length} etapas</span>
             </div>
-            <button onclick="nav('lots'); setTimeout(openAddLotModal, 100)" class="w-9 h-9 rounded-xl bg-gold-gradient flex items-center justify-center shadow-[0_0_15px_-3px_rgba(242,201,76,0.4)] hover:scale-105 transition-transform">
-                <iconify-icon icon="lucide:plus" width="18" class="text-charcoal-900"></iconify-icon>
-            </button>
+            <div class="w-full h-2 bg-charcoal-800 rounded-full overflow-hidden mb-1">
+                <div class="progress-fill h-full rounded-full bg-gold-gradient" style="width: ${progress}%"></div>
+            </div>
+            <p class="text-[10px] text-neutral-600 text-right">${progress}% concluído</p>
         </div>
-        ${cardsHtml}
-        
-        <div class="grid grid-cols-2 gap-3 mt-2">
-            <div class="bg-charcoal-900 border border-white/5 rounded-2xl p-4 cursor-pointer hover:border-white/10 transition-colors" onclick="nav('table')">
-                <iconify-icon icon="lucide:book-open" width="20" class="text-gold-400 mb-2"></iconify-icon>
-                <h4 class="text-sm font-bold">Tabela</h4>
-                <p class="text-[10px] text-neutral-500 mt-1">Parâmetros por ave</p>
-            </div>
-            <div class="bg-charcoal-900 border border-white/5 rounded-2xl p-4 cursor-pointer hover:border-white/10 transition-colors" onclick="nav('estufa')">
-                <iconify-icon icon="lucide:thermometer" width="20" class="text-gold-400 mb-2"></iconify-icon>
-                <h4 class="text-sm font-bold">Estufas</h4>
-                <p class="text-[10px] text-neutral-500 mt-1">Controle manual</p>
-            </div>
-        </div>
+        ${stepsHtml}
     `;
+}
+
+function handleStep(id) {
+    if (id === state.currentStep) {
+        showConfirm(`Concluir a etapa "${STEPS[id-1].title}" e avançar?`, () => {
+            state.currentStep = id + 1;
+            if(state.currentStep > STEPS.length) state.currentStep = STEPS.length; // Reset loop seguro
+            localStorage.setItem('ip_step', state.currentStep);
+            addNotif(`Etapa "${STEPS[id-1].title}" concluída!`, 'success');
+            renderHome();
+        });
+    } else if (id < state.currentStep) {
+        addNotif('Etapa já concluída anteriormente.', 'info');
+    }
 }
 
 // ================= TELA LOTES =================
 function renderLots() {
     const el = document.getElementById('page-lots');
-    const lots = state.lots;
-    
     let html = `
         <div class="flex items-center justify-between">
             <h2 class="text-lg font-bold">Lotes de Incubação</h2>
             <button onclick="openAddLotModal()" class="text-xs font-bold text-gold-400 bg-gold-500/10 px-3 py-1.5 rounded-lg">+ Novo Lote</button>
-        </div>
-    `;
+        </div>`;
 
-    if (lots.length === 0) {
+    if (state.lots.length === 0) {
         html += `<div class="text-center py-16 text-neutral-600"><iconify-icon icon="lucide:package-open" width="40" class="mx-auto mb-3"></iconify-icon><p class="text-sm">Nenhum lote registrado.</p></div>`;
     } else {
-        html += lots.map(l => {
-            const statusColors = { incubando: 'text-blue-400 bg-blue-400/10', nascido: 'text-green-400 bg-green-400/10', descartado: 'text-red-400 bg-red-400/10' };
-            const sc = statusColors[l.status] || statusColors.incubando;
+        html += state.lots.map(l => {
+            const sc = l.status === 'incubando' ? 'text-blue-400 bg-blue-400/10' : l.status === 'nascido' ? 'text-green-400 bg-green-400/10' : 'text-red-400 bg-red-400/10';
             return `
             <div class="lot-card bg-charcoal-900 border border-white/5 rounded-2xl p-4 cursor-pointer" onclick="openLotDetails('${l.id}')">
                 <div class="flex items-center justify-between mb-1">
@@ -193,9 +168,7 @@ function renderLots() {
                     <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md ${sc}">${l.status}</span>
                 </div>
                 <div class="flex items-center gap-4 text-xs text-neutral-500">
-                    <span>${l.species}</span>
-                    <span>${l.qty} ovos</span>
-                    <span>Início: ${formatDate(l.startDate)}</span>
+                    <span>${l.species}</span><span>${l.qty} ovos</span><span>Restam: ${getDaysLeft(l.startDate, l.days)}d</span>
                 </div>
             </div>`;
         }).join('');
@@ -204,66 +177,50 @@ function renderLots() {
 }
 
 function openAddLotModal() {
-    const specOptions = SPECIES.map(s => `<option value="${s.name}">${s.name} (${s.days} dias)</option>`).join('');
-    
+    const specOpts = SPECIES.map(s => `<option value="${s.name}">${s.name} (${s.days} dias)</option>`).join('');
     document.getElementById('modalContent').innerHTML = `
     <div class="bg-charcoal-900 rounded-t-3xl p-6 border-t border-x border-white/10 max-h-[85vh] overflow-y-auto">
         <div class="w-10 h-1 bg-neutral-700 rounded-full mx-auto mb-5"></div>
-        <h3 class="text-lg font-bold mb-5">Novo Lote de Incubação</h3>
+        <h3 class="text-lg font-bold mb-5">Novo Lote</h3>
         <div class="space-y-4">
             <div>
                 <label class="text-xs text-neutral-400 font-medium mb-1 block">Nome do Lote</label>
-                <input id="mLotName" type="text" placeholder="Ex: Lote 01 - Galinha" class="w-full bg-charcoal-800 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-600 focus:border-gold-500 transition-colors">
+                <input id="mLotName" type="text" placeholder="Ex: Lote 01" class="w-full bg-charcoal-800 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-600 focus:border-gold-500 transition-colors">
             </div>
             <div>
                 <label class="text-xs text-neutral-400 font-medium mb-1 block">Espécie</label>
-                <select id="mLotSpec" onchange="toggleCustomSpec()" class="w-full bg-charcoal-800 border border-white/10 rounded-xl px-4 py-3 text-sm text-white appearance-none focus:border-gold-500 transition-colors">
+                <select id="mLotSpec" onchange="toggleCustom()" class="w-full bg-charcoal-800 border border-white/10 rounded-xl px-4 py-3 text-sm text-white appearance-none focus:border-gold-500 transition-colors">
                     <option value="">Selecione...</option>
-                    ${specOptions}
+                    ${specOpts}
                     <option value="custom">Outra espécie (Personalizada)</option>
                 </select>
             </div>
-            <div id="customSpecFields" class="hidden space-y-4 p-4 bg-charcoal-800/50 rounded-xl border border-white/5">
-                <div>
-                    <label class="text-xs text-neutral-400 font-medium mb-1 block">Nome da Ave</label>
-                    <input id="mCustomName" type="text" placeholder="Ex: Papagaio" class="w-full bg-charcoal-800 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-600 focus:border-gold-500 transition-colors">
-                </div>
+            <div id="customFields" class="hidden space-y-4 p-4 bg-charcoal-800/50 rounded-xl border border-white/5">
+                <input id="mCName" type="text" placeholder="Nome da Ave" class="w-full bg-charcoal-800 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-600 focus:border-gold-500 transition-colors">
                 <div class="grid grid-cols-3 gap-3">
-                    <div>
-                        <label class="text-xs text-neutral-400 font-medium mb-1 block">Dias</label>
-                        <input id="mCustomDays" type="number" placeholder="21" class="w-full bg-charcoal-800 border border-white/10 rounded-xl px-3 py-3 text-sm text-white text-center placeholder-neutral-600 focus:border-gold-500 transition-colors">
-                    </div>
-                    <div>
-                        <label class="text-xs text-neutral-400 font-medium mb-1 block">Temp °C</label>
-                        <input id="mCustomTemp" type="number" step="0.1" placeholder="37.5" class="w-full bg-charcoal-800 border border-white/10 rounded-xl px-3 py-3 text-sm text-white text-center placeholder-neutral-600 focus:border-gold-500 transition-colors">
-                    </div>
-                    <div>
-                        <label class="text-xs text-neutral-400 font-medium mb-1 block">Umid %</label>
-                        <input id="mCustomHum" type="number" placeholder="60" class="w-full bg-charcoal-800 border border-white/10 rounded-xl px-3 py-3 text-sm text-white text-center placeholder-neutral-600 focus:border-gold-500 transition-colors">
-                    </div>
+                    <input id="mCDays" type="number" placeholder="Dias" class="bg-charcoal-800 border border-white/10 rounded-xl px-3 py-3 text-sm text-white text-center placeholder-neutral-600 focus:border-gold-500 transition-colors">
+                    <input id="mCTemp" type="number" step="0.1" placeholder="Temp °C" class="bg-charcoal-800 border border-white/10 rounded-xl px-3 py-3 text-sm text-white text-center placeholder-neutral-600 focus:border-gold-500 transition-colors">
+                    <input id="mCHum" type="number" placeholder="Umid %" class="bg-charcoal-800 border border-white/10 rounded-xl px-3 py-3 text-sm text-white text-center placeholder-neutral-600 focus:border-gold-500 transition-colors">
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="text-xs text-neutral-400 font-medium mb-1 block">Quantidade de Ovos</label>
+                    <label class="text-xs text-neutral-400 font-medium mb-1 block">Qtd. de Ovos</label>
                     <input id="mLotQty" type="number" placeholder="12" class="w-full bg-charcoal-800 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-600 focus:border-gold-500 transition-colors">
                 </div>
                 <div>
-                    <label class="text-xs text-neutral-400 font-medium mb-1 block">Data de Início</label>
+                    <label class="text-xs text-neutral-400 font-medium mb-1 block">Início</label>
                     <input id="mLotDate" type="date" value="${new Date().toISOString().split('T')[0]}" class="w-full bg-charcoal-800 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500 transition-colors">
                 </div>
             </div>
-            <button onclick="saveLot()" class="w-full bg-gold-gradient text-charcoal-900 font-bold text-sm py-3.5 rounded-xl hover:opacity-90 transition-opacity mt-2">
-                Salvar Lote
-            </button>
+            <button onclick="saveLot()" class="w-full bg-gold-gradient text-charcoal-900 font-bold text-sm py-3.5 rounded-xl hover:opacity-90 transition-opacity">Salvar Lote</button>
         </div>
     </div>`;
     openModal();
 }
 
-function toggleCustomSpec() {
-    const v = document.getElementById('mLotSpec').value;
-    document.getElementById('customSpecFields').classList.toggle('hidden', v !== 'custom');
+function toggleCustom() {
+    document.getElementById('customFields').classList.toggle('hidden', document.getElementById('mLotSpec').value !== 'custom');
 }
 
 function saveLot() {
@@ -271,99 +228,113 @@ function saveLot() {
     const specVal = document.getElementById('mLotSpec').value;
     const qty = parseInt(document.getElementById('mLotQty').value);
     const startDate = document.getElementById('mLotDate').value;
-
-    if (!name || !specVal || !qty || !startDate) {
-        addNotif('Preencha todos os campos obrigatórios.', 'error');
-        return;
-    }
+    if (!name || !specVal || !qty || !startDate) return addNotif('Preencha todos os campos.', 'error');
 
     let speciesName, days, temp, humidity;
-
     if (specVal === 'custom') {
-        speciesName = document.getElementById('mCustomName').value.trim();
-        days = parseInt(document.getElementById('mCustomDays').value);
-        temp = parseFloat(document.getElementById('mCustomTemp').value);
-        humidity = parseInt(document.getElementById('mCustomHum').value);
-        if (!speciesName || !days || !temp || !humidity) {
-            addNotif('Preencha os dados da espécie personalizada.', 'error');
-            return;
-        }
+        speciesName = document.getElementById('mCName').value.trim();
+        days = parseInt(document.getElementById('mCDays').value);
+        temp = parseFloat(document.getElementById('mCTemp').value);
+        humidity = parseInt(document.getElementById('mCHum').value);
+        if (!speciesName || !days || !temp || !humidity) return addNotif('Preencha os dados da espécie personalizada.', 'error');
     } else {
         const spec = SPECIES.find(s => s.name === specVal);
-        speciesName = spec.name;
-        days = spec.days;
-        temp = spec.temp;
-        humidity = spec.humidity;
+        speciesName = spec.name; days = spec.days; temp = spec.temp; humidity = spec.humidity;
     }
 
     const start = new Date(startDate + 'T00:00:00');
     start.setDate(start.getDate() + days);
-    const expectedDate = start.toISOString().split('T')[0];
-
-    const lot = {
-        id: 'lot_' + Date.now(),
-        name, species: speciesName, qty, startDate, expectedDate,
-        days, temp, humidity, status: 'incubando'
-    };
-
-    state.lots.push(lot);
+    
+    state.lots.push({ id: 'lot_'+Date.now(), name, species: speciesName, qty, startDate, expectedDate: start.toISOString().split('T')[0], days, temp, humidity, status: 'incubando' });
     save('lots', state.lots);
-    addNotif(`Lote "${name}" criado com sucesso!`, 'success');
-    closeModal();
-    renderLots();
-    if(currentTab === 'home') renderHome();
+    addNotif(`Lote "${name}" criado!`, 'success');
+    closeModal(); renderLots();
 }
 
 function openLotDetails(id) {
-    const l = state.lots.find(x => x.id === id);
-    if (!l) return;
+    const l = state.lots.find(x => x.id === id); if(!l) return;
     const daysLeft = getDaysLeft(l.startDate, l.days);
-    const progress = getProgress(l.startDate, l.days);
+    const sc = l.status === 'incubando' ? 'bg-blue-400/10 text-blue-400' : l.status === 'nascido' ? 'bg-green-400/10 text-green-400' : 'bg-red-400/10 text-red-400';
 
     document.getElementById('modalContent').innerHTML = `
     <div class="bg-charcoal-900 rounded-t-3xl p-6 border-t border-x border-white/10">
         <div class="w-10 h-1 bg-neutral-700 rounded-full mx-auto mb-5"></div>
-        <div class="flex justify-between items-start mb-4">
-            <div>
-                <h3 class="text-lg font-bold">${l.name}</h3>
-                <p class="text-xs text-neutral-500">${l.species} • ${l.qty} ovos</p>
-            </div>
-            <span class="text-xs font-bold px-2 py-1 rounded-lg ${l.status === 'incubando' ? 'bg-blue-400/10 text-blue-400' : l.status === 'nascido' ? 'bg-green-400/10 text-green-400' : 'bg-red-400/10 text-red-400'}">${l.status}</span>
+        <div class="flex justify-between items-start mb-6">
+            <div><h3 class="text-lg font-bold">${l.name}</h3><p class="text-xs text-neutral-500">${l.species} • ${l.qty} ovos</p></div>
+            <span class="text-xs font-bold px-2 py-1 rounded-lg ${sc}">${l.status}</span>
         </div>
-        
-        <div class="flex justify-center my-6 relative w-32 h-32 mx-auto">
-            <svg class="w-32 h-32 transform -rotate-90" viewBox="0 0 120 120">
-                <circle cx="60" cy="60" r="50" stroke="#1A1A1A" stroke-width="8" fill="none"/>
-                <circle cx="60" cy="60" r="50" stroke="url(#grad)" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="${Math.max(0, 314 - (314 * progress / 100))} 314"/>
-                <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#F2C94C"/><stop offset="100%" stop-color="#E6B800"/></linearGradient></defs>
-            </svg>
-            <div class="absolute inset-0 flex flex-col items-center justify-center">
-                <span class="text-3xl font-bold text-gold-400">${daysLeft > 0 ? daysLeft : 0}</span>
-                <span class="text-[10px] text-neutral-500">dias restantes</span>
-            </div>
+        <div class="grid grid-cols-2 gap-3 mb-6">
+            <div class="bg-charcoal-800 rounded-xl p-3 text-center"><p class="text-2xl font-bold text-gold-400">${daysLeft > 0 ? daysLeft : 0}</p><p class="text-[10px] text-neutral-500">Dias Restantes</p></div>
+            <div class="bg-charcoal-800 rounded-xl p-3 text-center"><p class="text-2xl font-bold text-white">${l.days}</p><p class="text-[10px] text-neutral-500">Total de Dias</p></div>
         </div>
-
-        <div class="grid grid-cols-3 gap-3 mb-6">
-            <div class="bg-charcoal-800 rounded-xl p-3 text-center">
-                <iconify-icon icon="lucide:thermometer" width="16" class="text-gold-400 mx-auto mb-1"></iconify-icon>
-                <p class="text-sm font-bold">${l.temp}°C</p>
-                <p class="text-[10px] text-neutral-500">Temp</p>
-            </div>
-            <div class="bg-charcoal-800 rounded-xl p-3 text-center">
-                <iconify-icon icon="lucide:droplets" width="16" class="text-gold-400 mx-auto mb-1"></iconify-icon>
-                <p class="text-sm font-bold">${l.humidity}%</p>
-                <p class="text-[10px] text-neutral-500">Umidade</p>
-            </div>
-            <div class="bg-charcoal-800 rounded-xl p-3 text-center">
-                <iconify-icon icon="lucide:calendar-days" width="16" class="text-gold-400 mx-auto mb-1"></iconify-icon>
-                <p class="text-sm font-bold">${l.days}d</p>
-                <p class="text-[10px] text-neutral-500">Total</p>
-            </div>
+        <div class="grid grid-cols-2 gap-3 mb-6">
+            <div class="bg-charcoal-800 rounded-xl p-3 text-center"><iconify-icon icon="lucide:thermometer" width="16" class="text-gold-400 mb-1"></iconify-icon><p class="text-sm font-bold">${l.temp}°C</p></div>
+            <div class="bg-charcoal-800 rounded-xl p-3 text-center"><iconify-icon icon="lucide:droplets" width="16" class="text-gold-400 mb-1"></iconify-icon><p class="text-sm font-bold">${l.humidity}%</p></div>
         </div>
-
         <div class="flex gap-2">
             ${l.status === 'incubando' ? `
-                <button onclick="changeStatus('${l.id}', 'nascido')" class="flex-1 bg-green-500/10 text-green-400 font-semibold text-xs py-3 rounded-xl hover:bg-green-500/20 transition-colors">
-                    <iconify-icon icon="lucide:check-circle" width="14" class="mr-1"></iconify-icon> Marcar Nascido
-                </button>
-                <button onclick="changeStatus('${l.id}', 'descartado')" class="flex-1 bg-red-500/10 text-red-400 font-semibold text-xs py-3 rounded-xl hover:bg-red-500/20 transition-colors">
+                <button onclick="changeStatus('${l.id}', 'nascido')" class="flex-1 bg-green-500/10 text-green-400 font-semibold text-xs py-3 rounded-xl">Marcar Nascido</button>
+                <button onclick="changeStatus('${l.id}', 'descartado')" class="flex-1 bg-red-500/10 text-red-400 font-semibold text-xs py-3 rounded-xl">Descartar</button>
+            ` : `<button onclick="deleteLot('${l.id}')" class="flex-1 bg-red-500/10 text-red-400 font-semibold text-xs py-3 rounded-xl">Excluir Lote</button>`}
+        </div>
+    </div>`;
+    openModal();
+}
+
+function changeStatus(id, status) {
+    const l = state.lots.find(x => x.id === id);
+    if(l){ l.status = status; save('lots', state.lots); addNotif(`Lote "${l.name}" marcado como ${status}.`, status==='nascido'?'success':'error'); closeModal(); renderLots(); }
+}
+function deleteLot(id) {
+    showConfirm('Excluir este lote permanentemente?', () => {
+        state.lots = state.lots.filter(x => x.id !== id); save('lots', state.lots); closeModal(); renderLots();
+    });
+}
+
+// ================= TELA CALENDÁRIO =================
+function renderCalendar() {
+    const el = document.getElementById('page-calendar');
+    const now = new Date(); const year = now.getFullYear(); const month = now.getMonth();
+    const firstDay = new Date(year, month, 1).getDay(); const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const monthName = now.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    
+    let daysHtml = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(d => `<div class="text-center text-[10px] font-medium text-neutral-600 py-2">${d}</div>`).join('');
+    for(let i=0; i<firstDay; i++) daysHtml += `<div></div>`;
+    
+    for(let d=1; d<=daysInMonth; d++) {
+        const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const isToday = d === now.getDate();
+        const hasEvent = state.lots.some(l => l.startDate === dateStr || l.expectedDate === dateStr);
+        daysHtml += `<div class="relative flex flex-col items-center justify-center py-2 rounded-xl ${isToday ? 'bg-gold-500/20 border border-gold-500/50' : ''}"><span class="text-xs font-medium ${isToday ? 'text-gold-400' : 'text-neutral-400'}">${d}</span>${hasEvent ? '<div class="w-1.5 h-1.5 rounded-full bg-gold-400 mt-0.5"></div>' : ''}</div>`;
+    }
+
+    el.innerHTML = `
+        <h2 class="text-lg font-bold capitalize">${monthName}</h2>
+        <div class="grid grid-cols-7 gap-1 bg-charcoal-900 rounded-2xl p-3 border border-white/5">${daysHtml}</div>
+        <h3 class="text-sm font-bold">Próximas Eclosões</h3>
+        <div class="space-y-2">${state.lots.filter(l=>l.status==='incubando').map(l=>`
+            <div class="flex items-center gap-3 bg-charcoal-900 border border-white/5 rounded-xl p-3">
+                <iconify-icon icon="lucide:egg" width="16" class="text-gold-400"></iconify-icon>
+                <div class="flex-1"><p class="text-xs font-bold">${l.name}</p><p class="text-[10px] text-neutral-500">Previsão: ${formatDate(l.expectedDate)}</p></div>
+                <span class="text-xs font-bold text-gold-400">${getDaysLeft(l.startDate, l.days)}d</span>
+            </div>`).join('') || '<p class="text-xs text-neutral-600 text-center py-4">Nenhum evento próximo.</p>'}</div>
+    `;
+}
+
+// ================= TELA IA (GROQ) =================
+function renderAI() {
+    const el = document.getElementById('page-ai');
+    const hasKey = !!state.groqKey;
+    let chatHtml = state.chatHistory.map(m => `
+        <div class="msg flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}">
+            <div class="max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${m.role === 'user' ? 'bg-gold-gradient text-charcoal-900 font-medium rounded-br-md' : 'bg-charcoal-800 text-neutral-200 border border-white/5 rounded-bl-md'}">
+                ${m.role === 'user' ? m.content : m.content.replace(/\*\*(.*?)\*\*/g, '<strong class="text-gold-300">$1</strong>').replace(/\n/g, '<br>')}
+            </div>
+        </div>`).join('');
+
+    el.innerHTML = `
+        <div class="flex flex-col h-full">
+            <div class="flex-1 overflow-y-auto space-y-3 pb-4" id="chatBox">
+                ${chatHtml || `<div class="flex flex-col items-center justify-center h-full text-center px-4">
+                    <div class="w-16 h-16 rounded-full bg-gold-500/10 flex items-center justify-center mb-4"><iconify-icon icon="lucide:bot" width="28" class="text-gold-400"></iconify-icon></div>
+                    <h3 class="font-bold text-neutral-300 mb-
